@@ -1,4 +1,6 @@
 import pygame
+import os
+os.system("cls")
 
 
 pygame.init()
