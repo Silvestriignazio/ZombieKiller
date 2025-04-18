@@ -1,5 +1,6 @@
 import pygame
 import os
+import math 
 
 os.system("cls")
 
@@ -31,8 +32,9 @@ def CaricaImmagini():
     personaggio_dx = pygame.image.load("immagini/personaggio_dx.png")  
     personaggio_sx = pygame.image.load("immagini/personaggio_sx.png")  
     personaggio_up = pygame.image.load("immagini/personaggio_up.png")  
-    personaggio_down = pygame.image.load("immagini/personaggio_down.png")  
-    return schermataTitolo, SfondoMappe, personaggio_dx, personaggio_sx, personaggio_up, personaggio_down
+    personaggio_down = pygame.image.load("immagini/personaggio_down.png")
+    proiettile = pygame.image.load("immagini/weapon_gun.png")
+    return schermataTitolo, SfondoMappe, personaggio_dx, personaggio_sx, personaggio_up, personaggio_down, proiettile
 
 def ScegliMappa(event):
     if event.type == pygame.KEYDOWN:
@@ -65,28 +67,26 @@ def GestisciMovimento(tastiPremuti, x, y, velocita):
         direzione = "down"
     return x, y, direzione
 
-def SparaProiettile(x, y, direzione):
-    
-    proiettili.append({"rect": pygame.Rect(x + personaggio_dx.get_width() // 2, y + personaggio_dx.get_height() // 2, 10, 5), "direzione": direzione})
+def SparaProiettile(x, y, mouse_x, mouse_y, lista):
+    pass
 
-def GestisciProiettili(proiettili, velocita_proiettile):
+def GestisciProiettili(proiettile, velocitaProiettile):
     
     for proiettile in proiettili[:]:
         if proiettile["direzione"] == "dx":
-            proiettile["rect"].x += velocita_proiettile
+            proiettile += velocitaProiettile
         elif proiettile["direzione"] == "sx":
-            proiettile["rect"].x -= velocita_proiettile
+            proiettile -= velocitaProiettile
         elif proiettile["direzione"] == "up":
-            proiettile["rect"].y -= velocita_proiettile
+            proiettile -= velocitaProiettile
         elif proiettile["direzione"] == "down":
-            proiettile["rect"].y += velocita_proiettile
+            proiettile += velocitaProiettile
 
         
-        if (proiettile["rect"].x > LARGHEZZASCHERMO or proiettile["rect"].x < 0 or
-                proiettile["rect"].y > ALTEZZASCHERMO or proiettile["rect"].y < 0):
+        if (proiettile> LARGHEZZASCHERMO or proiettile < 0 or proiettile> ALTEZZASCHERMO or proiettile < 0):
             proiettili.remove(proiettile)
 
-schermataTitolo, sfondoMappe, personaggio_dx, personaggio_sx, personaggio_up, personaggio_down = CaricaImmagini()
+schermataTitolo, SfondoMappe, personaggio_dx, personaggio_sx, personaggio_up, personaggio_down, proiettile = CaricaImmagini()
 
 mappaCorrente = None
 SpazioPremuto = False
@@ -121,7 +121,7 @@ while not gameOver:
     if not SpazioPremuto:
         schermo.blit(schermataTitolo, (0, 0))
     elif mappaCorrente is None:
-        schermo.blit(sfondoMappe, (0, 0))
+        schermo.blit(SfondoMappe, (0, 0))
         schermo.blit(MiniMappe[1], (100, 400))
         schermo.blit(MiniMappe[2], (580, 400))
         schermo.blit(MiniMappe[3], (1100, 400))
@@ -145,7 +145,7 @@ while not gameOver:
            
             GestisciProiettili(proiettili, velocita_proiettile)
             for proiettile in proiettili:
-                pygame.draw.rect(schermo, (255, 0, 0), proiettile["rect"])  
+                pygame.draw(schermo, (255, 0, 0), proiettile)  
 
     pygame.display.update()
     clock.tick(120)
