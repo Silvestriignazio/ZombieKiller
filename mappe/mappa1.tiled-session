@@ -3,10 +3,22 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "Senza Titolo.tmx",
     "expandedProjectPaths": [
     ],
     "fileStates": {
+        "C:/Users/rosil/Desktop/tileset mappa.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Senza Titolo.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 5,
+            "viewCenter": {
+                "x": 678,
+                "y": 282.66666666666663
+            }
+        },
         "mappa1.tmx": {
             "scale": 0.75,
             "selectedLayer": 0,
@@ -17,12 +29,19 @@
         }
     },
     "map.height": 50,
+    "map.lastUsedFormat": "tmx",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
     "map.width": 90,
     "openFiles": [
+        "mappa1.tmx",
+        "C:/Users/rosil/Desktop/tileset mappa.tsx",
+        "Senza Titolo.tmx"
     ],
     "project": "mappa1.tiled-project",
     "recentFiles": [
+        "mappa1.tmx",
+        "C:/Users/rosil/Desktop/tileset mappa.tsx",
+        "Senza Titolo.tmx"
     ]
 }
