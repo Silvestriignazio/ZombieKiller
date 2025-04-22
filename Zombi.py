@@ -102,37 +102,13 @@ def InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica):
         schermo.blit(testo_ricarica, (10, 40))
 
 def SpawnZombie(): 
-    lato = random.choice(["su", "giu", "sinistra", "destra"])
-    if lato == "su":
-        return random.randint(0, LARGHEZZASCHERMO), -50
-    elif lato == "giu":
-        return random.randint(0, LARGHEZZASCHERMO), ALTEZZASCHERMO + 50
-    elif lato == "sinistra":
-        return -50, random.randint(0, ALTEZZASCHERMO)
-    elif lato == "destra":
-        return LARGHEZZASCHERMO + 50, random.randint(0, ALTEZZASCHERMO)
+    pass
 
-def RotazioneZombie(immagine, x, y, giocatoreX, giocatoreY): 
-    dx = giocatoreX - x
-    dy = giocatoreY - y
-    angolo = -math.degrees(math.atan2(dy, dx))
-    immagineRuotata = pygame.transform.rotate(immagine, angolo)
-    immagineFinita = immagineRuotata.get_rect(center=(x, y))
-    return immagineRuotata, immagineFinita
+def RotazioneZombie(): 
+    pass
 
-def GestisciZombie(lista, giocatoreX, giocatoreY, velocita, immagine):
-    for zombie in lista:
-        if zombie["x"] < giocatoreX:
-            zombie["x"] += velocita
-        elif zombie["x"] > giocatoreX:
-            zombie["x"] -= velocita
-        if zombie["y"] < giocatoreY:
-            zombie["y"] += velocita
-        elif zombie["y"] > giocatoreY:
-            zombie["y"] -= velocita
-
-        zombieRuotato, zombieRect = RotazioneZombie(immagine, zombie["x"], zombie["y"], giocatoreX, giocatoreY)
-        schermo.blit(zombieRuotato, zombieRect.topleft)
+def GestisciZombie():
+    pass
 
 schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie = CaricaImmagini()
 
@@ -207,9 +183,9 @@ while not gameOver:
                 img = pygame.transform.rotate(proiettile, p["angolo"])
                 rect = img.get_rect(center=(p["x"], p["y"]))
                 schermo.blit(img, rect.topleft)
- 
-            InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica)
- 
+
+            MostraParametri(schermo, proiettili_rimanenti, maxProiettili, ricarica, ultimaRicarica)
+
             if pygame.time.get_ticks() % 2000 < 20:
                 zx, zy = SpawnZombie()
                 ListaZombie.append({"x": zx, "y": zy})
