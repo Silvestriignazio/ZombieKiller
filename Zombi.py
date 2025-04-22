@@ -103,9 +103,6 @@ def InfoProiettili():
     pass 
 
 def SpawnZombie(): 
-    pass
-
-def RotazioneZombie(): 
     lato = random.choice(["su", "giu", "sinistra", "destra"])
     if lato == "su":
         return random.randint(0, LARGHEZZASCHERMO), -50
@@ -116,15 +113,19 @@ def RotazioneZombie():
     elif lato == "destra":
         return LARGHEZZASCHERMO + 50, random.randint(0, ALTEZZASCHERMO)
 
-def GestisciZombie(immagine, x, y, giocatoreX, giocatoreY):
+
+def RotazioneZombie(immagine, x, y, giocatoreX, giocatoreY): 
     # Calcoliamo la direzione verso il giocatore
     dx = giocatoreX - x
     dy = giocatoreY - y
     angolo = -math.degrees(math.atan2(dy, dx))  # Calcoliamo l'angolo tra zombie e giocatore
     immagineRuotata = pygame.transform.rotate(immagine, angolo)  # Ruotiamo l'immagine dello zombie
-    ImmagineCorretta = immagineRuotata.get_rect(center=(x, y))  # Posizioniamo l'immagine ruotata correttamente
-    return immagineRuotata, ImmagineCorretta
+    immagineFinita = immagineRuotata.get_rect(center=(x, y))  # Posizioniamo l'immagine ruotata correttamente
+    return immagineRuotata, immagineFinita
 
+def GestisciZombie():
+    pass
+    
 schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie = CaricaImmagini()
 
 mappaCorrente = None
