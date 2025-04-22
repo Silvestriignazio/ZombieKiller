@@ -137,7 +137,7 @@ velocita = 5
 listaProiettili = []
 maxProiettili = 12
 proiettili_rimanenti = maxProiettili
-velocita_proiettile = 10
+velocitaProiettile = 10
 ultimoColpo = time.time()
 ultimaRicarica = 0
 ricarica = False
@@ -193,7 +193,7 @@ while not gameOver:
             giocatoreRuotato, giocatoreRett = RuotaVersoMouse(personaggioBase, giocatore_x, giocatore_y, mouseX, mouseY)
             schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
 
-            GestisciProiettili(listaProiettili, velocita_proiettile)
+            GestisciProiettili(proiettile, velocitaProiettile, listaProiettili)
             for p in listaProiettili:
                 img = pygame.transform.rotate(proiettile, p["angolo"])
                 rect = img.get_rect(center=(p["x"], p["y"]))
