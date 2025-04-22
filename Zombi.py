@@ -106,10 +106,24 @@ def SpawnZombie():
     pass
 
 def RotazioneZombie(): 
-    pass
+    lato = random.choice(["su", "giu", "sinistra", "destra"])
+    if lato == "su":
+        return random.randint(0, LARGHEZZASCHERMO), -50
+    elif lato == "giu":
+        return random.randint(0, LARGHEZZASCHERMO), ALTEZZASCHERMO + 50
+    elif lato == "sinistra":
+        return -50, random.randint(0, ALTEZZASCHERMO)
+    elif lato == "destra":
+        return LARGHEZZASCHERMO + 50, random.randint(0, ALTEZZASCHERMO)
 
-def GestisciZombie():
-    pass
+def GestisciZombie(immagine, x, y, giocatoreX, giocatoreY):
+    # Calcoliamo la direzione verso il giocatore
+    dx = giocatoreX - x
+    dy = giocatoreY - y
+    angolo = -math.degrees(math.atan2(dy, dx))  # Calcoliamo l'angolo tra zombie e giocatore
+    immagineRuotata = pygame.transform.rotate(immagine, angolo)  # Ruotiamo l'immagine dello zombie
+    ImmagineCorretta = immagineRuotata.get_rect(center=(x, y))  # Posizioniamo l'immagine ruotata correttamente
+    return immagineRuotata, ImmagineCorretta
 
 schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie = CaricaImmagini()
 
@@ -185,7 +199,7 @@ while not gameOver:
                 rect = img.get_rect(center=(p["x"], p["y"]))
                 schermo.blit(img, rect.topleft)
 
-            MostraParametri(schermo, proiettili_rimanenti, maxProiettili, ricarica, ultimaRicarica)
+            InfoProiettili(schermo, proiettili_rimanenti, maxProiettili, ricarica, ultimaRicarica)
 
             if pygame.time.get_ticks() % 2000 < 20:
                 zx, zy = SpawnZombie()
