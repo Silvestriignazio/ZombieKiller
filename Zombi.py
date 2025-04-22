@@ -1,12 +1,19 @@
 import pygame
 import os
+import math
+import time
+import random
 
 os.system("cls")
-
 pygame.init()
 
 MINIMAPPA_LARGHEZZA = 300
 MINIMAPPA_ALTEZZA = 250
+LARGHEZZASCHERMO = 1440
+ALTEZZASCHERMO = 796
+
+pygame.display.set_caption('ZOMBI KILLER')
+schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO))
 
 DizionarioMappe = {
     1: pygame.image.load("mappe/mappa1.png"),
@@ -20,20 +27,24 @@ MiniMappe = {
     3: pygame.transform.scale(DizionarioMappe[3], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
 }
 
-LARGHEZZASCHERMO = 1440
-ALTEZZASCHERMO = 796
 pygame.display.set_caption('ZOMBI KILLER')
 schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO))
 
 def CaricaImmagini():
     schermataTitolo = pygame.image.load("immagini/titolo.png")
-    SfondoMappe = pygame.image.load("immagini/sfondoMappe.png")
-    personaggio_dx = pygame.image.load("immagini/personaggio_dx.png")  
-    personaggio_sx = pygame.image.load("immagini/personaggio_sx.png")  
-    personaggio_up = pygame.image.load("immagini/personaggio_up.png")  
-    personaggio_down = pygame.image.load("immagini/personaggio_down.png")
-    proiettile = pygame.image.load("immagini/weapon_gun.png")
-    return schermataTitolo, SfondoMappe, personaggio_dx, personaggio_sx, personaggio_up, personaggio_down, proiettile
+    sfondoMappe = pygame.image.load("immagini/sfondoMappe.png")
+    personaggio = pygame.image.load("immagini/personaggio.png")
+    proiettile = pygame.transform.scale(pygame.image.load("immagini/weapon_gun.png"), (10, 10))
+    zombie = pygame.image.load("immagini/zombie.png")
+    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie
+
+def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
+    dx = mouseX - x
+    dy = mouseY - y
+    angolo = -math.degrees(math.atan2(dy, dx))
+    immagineRuotata = pygame.transform.rotate(immagine, angolo)
+    rett = immagineRuotata.get_rect(center=(x + immagine.get_width() // 2, y + immagine.get_height() // 2))
+    return immagineRuotata, rett
 
 def ScegliMappa(event):
     if event.type == pygame.KEYDOWN:
@@ -50,28 +61,31 @@ def GestisciSpazio(event, SpazioPremuto):
         return True
     return SpazioPremuto
 
-def GestisciMovimento(tastiPremuti, x, y, velocita):
-    direzione = None
-    if tastiPremuti[pygame.K_a] and x > 0:  
+def GestisciMovimento(tasti, x, y, velocita):
+    if tasti[pygame.K_a] and x > 0:
         x -= velocita
-        direzione = "sx"
-    if tastiPremuti[pygame.K_d] and x < LARGHEZZASCHERMO - personaggio_dx.get_width(): 
+    if tasti[pygame.K_d] and x < LARGHEZZASCHERMO - 64:
         x += velocita
-        direzione = "dx"
-    if tastiPremuti[pygame.K_w] and y > 0:  
+    if tasti[pygame.K_w] and y > 0:
         y -= velocita
-        direzione = "up"
-    if tastiPremuti[pygame.K_s] and y < ALTEZZASCHERMO - personaggio_dx.get_height(): 
+    if tasti[pygame.K_s] and y < ALTEZZASCHERMO - 64:
         y += velocita
-        direzione = "down"
-    return x, y, direzione
+    return x, y
 
-def SparaProiettile(x, y, mouse_x, mouse_y, lista):
-    pass
+def SparaProiettile(x, y, mouseX, mouseY, Proiettili):
+    angolo_rad = math.atan2(mouseY - y, mouseX - x)
+    dx = math.cos(angolo_rad)
+    dy = math.sin(angolo_rad)
+    Proiettili.append({
+        "x": x + 32,
+        "y": y + 32,
+        "dx": dx,
+        "dy": dy,
+        "angolo": -math.degrees(angolo_rad)
+    })
 
-def GestisciProiettili(proiettile, velocitaProiettile):
-    
-    for proiettile in proiettili[:]:
+def GestisciProiettili(proiettile, velocitaProiettile, ListaProiettili):
+    for proiettile in ListaProiettili:
         if proiettile["direzione"] == "dx":
             proiettile += velocitaProiettile
         elif proiettile["direzione"] == "sx":
@@ -83,41 +97,72 @@ def GestisciProiettili(proiettile, velocitaProiettile):
 
         
         if (proiettile> LARGHEZZASCHERMO or proiettile < 0 or proiettile> ALTEZZASCHERMO or proiettile < 0):
-            proiettili.remove(proiettile)
+            listaProiettili.remove(proiettile)
 
-schermataTitolo, SfondoMappe, personaggio_dx, personaggio_sx, personaggio_up, personaggio_down, proiettile = CaricaImmagini()
+def InfoProiettili():
+    pass 
+
+def SpawnZombie(): 
+    pass
+
+def RotazioneZombie(): 
+    pass
+
+def GestisciZombie():
+    pass
+
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie = CaricaImmagini()
 
 mappaCorrente = None
-SpazioPremuto = False
+spazioPremuto = False
 
-posX = 300
-posY = 300
+giocatoreX = 300
+giocatoreY = 300
 velocita = 5
 
-proiettili = []  
-velocita_proiettile = 10  
+listaProiettili = []
+maxProiettili = 12
+proiettili_rimanenti = maxProiettili
+velocita_proiettile = 10
+ultimoColpo = time.time()
+ultimaRicarica = 0
+ricarica = False
+
+ListaZombie = []
+velocitàZombie = 2
 
 clock = pygame.time.Clock()
 gameOver = False
-
-direzione_corrente = "dx"
 
 while not gameOver:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameOver = True
 
-        SpazioPremuto = GestisciSpazio(event, SpazioPremuto)
+        spazioPremuto = GestisciSpazio(event, spazioPremuto)
 
-        if SpazioPremuto and mappaCorrente is None:
+        if spazioPremuto and mappaCorrente is None:
             scelta = ScegliMappa(event)
             if scelta:
                 mappaCorrente = scelta
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and mappaCorrente is not None:
-            SparaProiettile(posX, posY, direzione_corrente)
+            mouseX, mouseY = pygame.mouse.get_pos()
+            if proiettili_rimanenti > 0 and not ricarica and time.time() - ultimoColpo >= 0.5:
+                SparaProiettile(giocatore_x, giocatore_y, mouseX, mouseY, listaProiettili)
+                proiettili_rimanenti -= 1
+                ultimoColpo = time.time()
 
-    if not SpazioPremuto:
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+            if not ricarica and proiettili_rimanenti < maxProiettili:
+                ricarica = True
+                ultimaRicarica = time.time()
+
+    if ricarica and time.time() - ultimaRicarica >= 3:
+        proiettili_rimanenti = maxProiettili
+        ricarica = False
+
+    if not spazioPremuto:
         schermo.blit(schermataTitolo, (0, 0))
     elif mappaCorrente is None:
         schermo.blit(SfondoMappe, (0, 0))
@@ -128,23 +173,25 @@ while not gameOver:
         schermo.blit(mappaCorrente, (0, 0))
         if mappaCorrente == DizionarioMappe[1]:
             tasti = pygame.key.get_pressed()
-            posX, posY, nuova_direzione = GestisciMovimento(tasti, posX, posY, velocita)
-            if nuova_direzione:
-                direzione_corrente = nuova_direzione
+            giocatore_x, giocatore_y = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
 
-            if direzione_corrente == "dx":
-                schermo.blit(personaggio_dx, (posX, posY))
-            elif direzione_corrente == "sx":
-                schermo.blit(personaggio_sx, (posX, posY))
-            elif direzione_corrente == "up":
-                schermo.blit(personaggio_up, (posX, posY))
-            elif direzione_corrente == "down":
-                schermo.blit(personaggio_down, (posX, posY))
+            mouseX, mouseY = pygame.mouse.get_pos()
+            giocatoreRuotato, giocatoreRett = RuotaVersoMouse(personaggioBase, giocatore_x, giocatore_y, mouseX, mouseY)
+            schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
 
-           
-            GestisciProiettili(proiettili, velocita_proiettile)
-            for proiettile in proiettili:
-                pygame.draw(schermo, (255, 0, 0), proiettile)  
+            GestisciProiettili(listaProiettili, velocita_proiettile)
+            for p in listaProiettili:
+                img = pygame.transform.rotate(proiettile, p["angolo"])
+                rect = img.get_rect(center=(p["x"], p["y"]))
+                schermo.blit(img, rect.topleft)
+
+            MostraParametri(schermo, proiettili_rimanenti, maxProiettili, ricarica, ultimaRicarica)
+
+            if pygame.time.get_ticks() % 2000 < 20:
+                zx, zy = SpawnZombie()
+                ListaZombie.append({"x": zx, "y": zy})
+
+            GestisciZombie(ListaZombie, giocatoreX, giocatore_y, velocitàZombie, zombie) 
 
     pygame.display.update()
     clock.tick(120)
