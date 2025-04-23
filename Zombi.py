@@ -92,14 +92,14 @@ def GestisciProiettili(listaProiettili, velocitaProiettile):
     for p in proiettili_da_rimuovere:
         listaProiettili.remove(p)
 
-def InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica):
+def InfoProiettili(schermo, proiettiliRimanenti, ricarica, ultimaRicarica):
     font = pygame.font.Font("font\ZOMBIE.TTF", 36)
-    testo_colpi = font.render(f'Colpi: {proiettili_rimanenti}', True, (255, 255, 255))
-    schermo.blit(testo_colpi, (10, 10))
+    testoColpi = font.render(F"Colpi {proiettiliRimanenti}", True, (255, 255, 255))
+    schermo.blit(testoColpi, (10, 10))
     if ricarica:
-        tempo_ricarica = max(0, 3 - int(time.time() - ultimaRicarica))
-        testo_ricarica = font.render(f'Ricarica: {tempo_ricarica}s', True, (255, 0, 0))
-        schermo.blit(testo_ricarica, (10, 40))
+        tempoRicarica = max(0, 3 - int(time.time() - ultimaRicarica))
+        testoRicarica = font.render(F"Ricarica {tempoRicarica}s", True, (255, 0, 0))
+        schermo.blit(testoRicarica, (10, 40))
 
 def SpawnZombie(): 
     lato = random.choice(["su", "giu", "sinistra", "destra"])
@@ -121,18 +121,59 @@ def RotazioneZombie(immagine, x, y, giocatoreX, giocatoreY):
     return immagineRuotata, immagineFinita
 
 def GestisciZombie(lista, giocatoreX, giocatoreY, velocita, immagine):
+    centroGiocatoreX = giocatoreX + 32 
+    centroGiocatoreY = giocatoreY + 32
     for zombie in lista:
-        if zombie["x"] < giocatoreX:
+        if zombie["x"] < centroGiocatoreX:
             zombie["x"] += velocita
-        elif zombie["x"] > giocatoreX:
+        elif zombie["x"] > centroGiocatoreX:
             zombie["x"] -= velocita
-        if zombie["y"] < giocatoreY:
+        if zombie["y"] < centroGiocatoreY:
             zombie["y"] += velocita
-        elif zombie["y"] > giocatoreY:
+        elif zombie["y"] > centroGiocatoreY:
             zombie["y"] -= velocita
 
         zombieRuotato, zombieRect = RotazioneZombie(immagine, zombie["x"], zombie["y"], giocatoreX, giocatoreY)
         schermo.blit(zombieRuotato, zombieRect.topleft)
+
+def CollisioniZombie(zombi, proiettili):
+    ListaZombiDaRimuovere = []
+    ListaProiettiliDaRimuovere = []
+
+    for z in zombi:
+        zombie_rect = pygame.Rect(z["x"], z["y"], 40, 40)
+        for p in proiettili:
+            proiettile_rect = pygame.Rect(p["x"], p["y"], 10, 10)
+            if zombie_rect.colliderect(proiettile_rect):
+                ListaZombiDaRimuovere.append(z)
+                ListaProiettiliDaRimuovere.append(p)
+
+    for z in ListaZombiDaRimuovere:
+        if z in zombi:
+            zombi.remove(z)
+    for p in ListaProiettiliDaRimuovere:
+        if p in proiettili:
+            proiettili.remove(p)
+
+def AumentoSpawnZombie(tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie):
+    
+    if pygame.time.get_ticks() - tempoUltimoAumento >= 15000:
+        if frequenzaSpawn > 500: 
+            frequenzaSpawn -= 500 
+        tempoUltimoAumento = pygame.time.get_ticks() 
+    
+    
+    if pygame.time.get_ticks() - tempoUltimoSpawn >= frequenzaSpawn:
+        zx, zy = SpawnZombie()
+        ListaZombie.append({"x": zx, "y": zy})
+        tempoUltimoSpawn = pygame.time.get_ticks()
+    
+    return tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie
+
+def CollisioneGiocatore(zombi, personaggio):
+    pass
+
+
 
 schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie = CaricaImmagini()
 
@@ -153,6 +194,10 @@ ricarica = False
 
 ListaZombie = []
 velocitaZombie = 2
+
+tempoUltimoSpawn = 0
+frequenzaSpawn = 2000
+tempoUltimoAumento = 0 
 
 clock = pygame.time.Clock()
 gameOver = False
@@ -208,12 +253,14 @@ while not gameOver:
                 rect = img.get_rect(center=(p["x"], p["y"]))
                 schermo.blit(img, rect.topleft)
  
+            CollisioniZombie(ListaZombie, listaProiettili)
+
             InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica)
  
-            if pygame.time.get_ticks() % 2000 < 20:
-                zx, zy = SpawnZombie()
-                ListaZombie.append({"x": zx, "y": zy})
- 
+            tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie = AumentoSpawnZombie(
+                tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie
+            )
+
             GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
             InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica)
 
