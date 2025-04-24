@@ -243,17 +243,37 @@ def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, c
     return cuori, tempoUltimoDanno, contatoreDanno
 
 
-def CuoriCasuali():
-    pass 
+def CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocatoreY, cuori, maxCuori):
+    # Spawn del cuore se non visibile e trascorso abbastanza tempo
+    if not CuoreVisibile and pygame.time.get_ticks() - tempoUltimoCuore >= 5000:
+        CuorePos = (random.randint(0, LARGHEZZASCHERMO - 70), random.randint(0, ALTEZZASCHERMO - 70))
+        CuoreVisibile = True
+        tempoUltimoCuore = pygame.time.get_ticks()
+
+    # Controlla se il giocatore raccoglie il cuore
+    if CuoreVisibile:
+        rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 64, 64)
+        rectCuore = pygame.Rect(CuorePos[0], CuorePos[1], 70, 70)
+        if rectGiocatore.colliderect(rectCuore):
+            if cuori < maxCuori:  # Aggiunge un cuore solo se non si supera il massimo
+                cuori += 1
+            CuoreVisibile = False  # Rimuove il cuore dalla mappa
+
+    # Disegna il cuore sullo schermo se visibile
+    if CuoreVisibile:
+        schermo.blit(cuore, CuorePos)
+
+    return tempoUltimoCuore, CuorePos, CuoreVisibile, cuori
 
 def FulminiCasuali():
     pass
+    
 
 def ColpiCausali():
     pass
 
 
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore = CaricaImmagini()
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine = CaricaImmagini()
 
 mappaCorrente = None
 spazioPremuto = False
@@ -262,6 +282,13 @@ giocatoreX = 300
 giocatoreY = 300
 velocita = 5
 velocitaZombie = 2
+
+tempoUltimoCuore = pygame.time.get_ticks()
+CuorePos = (0, 0)  # Posizione iniziale
+CuoreVisibile = False
+tempoApparizioneCuore = 0  # Tempo di quando è apparso l'ultimo fulmine
+tempoFulmine = 8000
+maxCuori = 3
 
 listaProiettili = []
 maxProiettili = 20
@@ -290,7 +317,6 @@ contatoreDanno = 0
 tempoUltimoDanno = pygame.time.get_ticks()
 
 
-
 clock = pygame.time.Clock()
 gameOver = False
 
@@ -315,7 +341,7 @@ while not gameOver:
                 ricarica = True
                 ultimaRicarica = time.time()
 
-    if ricarica and time.time() - ultimaRicarica >= 3:
+    if ricarica and time.time() - ultimaRicarica >= 2:
         proiettili_rimanenti = maxProiettili
         ricarica = False
 
@@ -345,6 +371,9 @@ while not gameOver:
             cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
             GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
             schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
+            tempoUltimoCuore, CuorePos, CuoreVisibile, cuori = CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocatoreY, cuori, maxCuori)
+            
+
 
 
 
