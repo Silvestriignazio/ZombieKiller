@@ -97,13 +97,12 @@ def GestisciProiettili(listaProiettili, velocitaProiettile):
             restanti.append(p)
     listaProiettili[:] = restanti
 
-
 def InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica):
     font = pygame.font.Font("ProgettoAprile/font/ZOMBIE.TTF", 36)
     testoColpi = font.render(f"Colpi {proiettili_rimanenti}", True, (255,255,255))
     schermo.blit(testoColpi, (10,10))
     if ricarica:
-        tempo = max(0, 3 - int(time.time() - ultimaRicarica))
+        tempo = max(0, 2 - int(time.time() - ultimaRicarica))
         testoRicarica = font.render(f"Ricarica {tempo}s", True, (255,0,0))
         schermo.blit(testoRicarica, (10,50))
 
@@ -117,37 +116,35 @@ def SpawnZombie():
         return [-50, random.randint(0, ALTEZZASCHERMO)]
     return [LARGHEZZASCHERMO + 50, random.randint(0, ALTEZZASCHERMO)]
 
-
 def GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie):
     centroX = giocatoreX + 32
     centroY = giocatoreY + 32
     distanza_minima = 40
+    distanza_minima_sq = distanza_minima * distanza_minima
 
-    # Aggiorna le posizioni con attrazione + repulsione
     for i, z in enumerate(ListaZombie):
-        # Direzione verso il giocatore
-        direzioneX = centroX - z[0]
-        direzioneY = centroY - z[1]
-        distanza = math.hypot(direzioneX, direzioneY)
-        if distanza != 0:
-            direzioneX /= distanza
-            direzioneY /= distanza
+        dx_giocatore = centroX - z[0]
+        dy_giocatore = centroY - z[1]
+        distanza_giocatore_sq = dx_giocatore**2 + dy_giocatore**2
 
-        # Aggiungi direzione verso il giocatore
-        movimentoX = direzioneX * velocitaZombie
-        movimentoY = direzioneY * velocitaZombie
+        if distanza_giocatore_sq != 0:
+            inv_distanza = 1 / (distanza_giocatore_sq**0.5)
+            movimentoX = dx_giocatore * inv_distanza * velocitaZombie
+            movimentoY = dy_giocatore * inv_distanza * velocitaZombie
+        else:
+            movimentoX, movimentoY = 0, 0
 
-        # Aggiungi forza repulsiva da altri zombie
+        # Forza repulsiva dagli altri zombie
         for j, altro in enumerate(ListaZombie):
             if i != j:
                 dx = z[0] - altro[0]
                 dy = z[1] - altro[1]
-                distanza_z = math.hypot(dx, dy)
-                if distanza_z < distanza_minima and distanza_z > 0:
-                    # Spingi lo zombie lontano
-                    repulsione = (distanza_minima - distanza_z) / distanza_minima
-                    movimentoX += (dx / distanza_z) * repulsione * velocitaZombie
-                    movimentoY += (dy / distanza_z) * repulsione * velocitaZombie
+                dist_sq = dx**2 + dy**2
+                if 0 < dist_sq < distanza_minima_sq:
+                    inv_dist = 1 / (dist_sq**0.5)
+                    forza_repulsiva = (distanza_minima_sq - dist_sq) / distanza_minima_sq
+                    movimentoX += dx * inv_dist * forza_repulsiva * velocitaZombie
+                    movimentoY += dy * inv_dist * forza_repulsiva * velocitaZombie
 
         z[0] += movimentoX
         z[1] += movimentoY
@@ -160,7 +157,7 @@ def CollisioniZombie(ListaZombie, listaProiettili):
     daRimuovereZ = []
     daRimuovereP = []
     for z in ListaZombie:
-        rectZ = pygame.Rect(z[0], z[1], 40, 40)
+        rectZ = pygame.Rect(z[0], z[1], 40, 43)
         for p in listaProiettili:
             rectP = pygame.Rect(p[0], p[1], 10, 10)
             if rectZ.colliderect(rectP):
