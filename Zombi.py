@@ -15,9 +15,9 @@ pygame.display.set_caption('ZOMBI KILLER')
 schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO))
 
 DizionarioMappe = {
-    1: pygame.image.load("ProgettoAprile/mappe/mappa1.png"),
-    2: pygame.image.load("ProgettoAprile/mappe/mappa2.png"),
-    3: pygame.image.load("ProgettoAprile/mappe/mappa3.png")
+    1: pygame.image.load("mappe/mappa1.png"),
+    2: pygame.image.load("mappe/mappa2.png"),
+    3: pygame.image.load("mappe/mappa3.png")
 }
 MiniMappe = {
     1: pygame.transform.scale(DizionarioMappe[1], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
@@ -27,12 +27,15 @@ MiniMappe = {
 
 
 def CaricaImmagini():
-    schermataTitolo = pygame.image.load("ProgettoAprile/immagini/titolo.png")
-    sfondoMappe = pygame.image.load("ProgettoAprile/immagini/sfondoMappe.png")
-    personaggio = pygame.image.load("ProgettoAprile/immagini/personaggio.png")
-    proiettile = pygame.transform.scale(pygame.image.load("ProgettoAprile/immagini/weapon_gun.png"), (10, 10))
-    zombie = pygame.image.load("ProgettoAprile/immagini/zombie.png")
-    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie
+    schermataTitolo = pygame.image.load("immagini/titolo.png")
+    sfondoMappe = pygame.image.load("immagini/sfondoMappe.png")
+    personaggio = pygame.image.load("immagini/personaggio.png")
+    proiettile = pygame.transform.scale(pygame.image.load("immagini/weapon_gun.png"), (10, 10))
+    zombie = pygame.image.load("immagini/zombie.png")
+    sangue = pygame.transform.scale(pygame.image.load("immagini/sangue.png"), (10, 10))
+    cuore = pygame.transform.scale(pygame.image.load("immagini/cuore.png"), (10, 10))
+    mezzocuore = pygame.transform.scale(pygame.image.load("immagini/mezzocuore.png"), (10, 10))
+    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, mezzocuore
 
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
@@ -98,7 +101,7 @@ def GestisciProiettili(listaProiettili, velocitaProiettile):
     listaProiettili[:] = restanti
 
 def InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica):
-    font = pygame.font.Font("ProgettoAprile/font/ZOMBIE.TTF", 36)
+    font = pygame.font.Font("font/ZOMBIE.TTF", 36)
     testoColpi = font.render(f"Colpi {proiettili_rimanenti}", True, (255,255,255))
     schermo.blit(testoColpi, (10,10))
     if ricarica:
@@ -119,18 +122,18 @@ def SpawnZombie():
 def GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie):
     centroX = giocatoreX + 32
     centroY = giocatoreY + 32
-    distanza_minima = 40
-    distanza_minima_sq = distanza_minima * distanza_minima
+    distanzaMinima = 40
+    distanzaMinima_sq = distanzaMinima * distanzaMinima
 
     for i, z in enumerate(ListaZombie):
-        dx_giocatore = centroX - z[0]
-        dy_giocatore = centroY - z[1]
-        distanza_giocatore_sq = dx_giocatore**2 + dy_giocatore**2
+        dxGiocatore = centroX - z[0]
+        dyGiocatore = centroY - z[1]
+        distanza_giocatore_quadrato = dxGiocatore**2 + dyGiocatore**2
 
-        if distanza_giocatore_sq != 0:
-            inv_distanza = 1 / (distanza_giocatore_sq**0.5)
-            movimentoX = dx_giocatore * inv_distanza * velocitaZombie
-            movimentoY = dy_giocatore * inv_distanza * velocitaZombie
+        if distanza_giocatore_quadrato != 0:
+            inv_distanza = 1 / (distanza_giocatore_quadrato**0.5)
+            movimentoX = dxGiocatore * inv_distanza * velocitaZombie
+            movimentoY = dyGiocatore * inv_distanza * velocitaZombie
         else:
             movimentoX, movimentoY = 0, 0
 
@@ -140,9 +143,9 @@ def GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie):
                 dx = z[0] - altro[0]
                 dy = z[1] - altro[1]
                 dist_sq = dx**2 + dy**2
-                if 0 < dist_sq < distanza_minima_sq:
+                if 0 < dist_sq < distanzaMinima_sq:
                     inv_dist = 1 / (dist_sq**0.5)
-                    forza_repulsiva = (distanza_minima_sq - dist_sq) / distanza_minima_sq
+                    forza_repulsiva = (distanzaMinima_sq - dist_sq) / distanzaMinima_sq
                     movimentoX += dx * inv_dist * forza_repulsiva * velocitaZombie
                     movimentoY += dy * inv_dist * forza_repulsiva * velocitaZombie
 
@@ -181,8 +184,13 @@ def AumentoSpawnZombie(tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, Lis
         tempoUltimoSpawn = pygame.time.get_ticks()
     return tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie
 
+def GestisciSangue():
+    pass
 
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie = CaricaImmagini()
+def GestisciVita():
+    pass
+
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, mezzocuore = CaricaImmagini()
 
 mappaCorrente = None
 spazioPremuto = False
