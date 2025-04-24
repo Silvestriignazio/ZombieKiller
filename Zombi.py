@@ -97,13 +97,12 @@ def GestisciProiettili(listaProiettili, velocitaProiettile):
             restanti.append(p)
     listaProiettili[:] = restanti
 
-
 def InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica):
     font = pygame.font.Font("font/ZOMBIE.TTF", 36)
     testoColpi = font.render(f"Colpi {proiettili_rimanenti}", True, (255,255,255))
     schermo.blit(testoColpi, (10,10))
     if ricarica:
-        tempo = max(0, 3 - int(time.time() - ultimaRicarica))
+        tempo = max(0, 2 - int(time.time() - ultimaRicarica))
         testoRicarica = font.render(f"Ricarica {tempo}s", True, (255,0,0))
         schermo.blit(testoRicarica, (10,50))
 
@@ -116,7 +115,6 @@ def SpawnZombie():
     if lato == "sinistra":
         return [-50, random.randint(0, ALTEZZASCHERMO)]
     return [LARGHEZZASCHERMO + 50, random.randint(0, ALTEZZASCHERMO)]
-
 
 def GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie):
     centroX = giocatoreX + 32
@@ -138,7 +136,7 @@ def CollisioniZombie(ListaZombie, listaProiettili):
     daRimuovereZ = []
     daRimuovereP = []
     for z in ListaZombie:
-        rectZ = pygame.Rect(z[0], z[1], 40, 40)
+        rectZ = pygame.Rect(z[0], z[1], 40, 43)
         for p in listaProiettili:
             rectP = pygame.Rect(p[0], p[1], 10, 10)
             if rectZ.colliderect(rectP):
