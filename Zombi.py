@@ -198,7 +198,7 @@ def AumentoSpawnZombie(tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, Lis
 
 
 def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno):
-    rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 64, 64)
+    rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 32, 32)
     tempoAttuale = pygame.time.get_ticks()
     dannoSubito = False
 
