@@ -25,16 +25,16 @@ MiniMappe = {
     3: pygame.transform.scale(DizionarioMappe[3], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA))
 }
 
-
 def CaricaImmagini():
     schermataTitolo = pygame.image.load("immagini/titolo.png")
     sfondoMappe = pygame.image.load("immagini/sfondoMappe.png")
     personaggio = pygame.image.load("immagini/personaggio.png")
     proiettile = pygame.transform.scale(pygame.image.load("immagini/weapon_gun.png"), (10, 10))
     zombie = pygame.image.load("immagini/zombie.png")
-    sangue = pygame.transform.scale(pygame.image.load("immagini/sangue.png"), (10, 10))
+    sangue = pygame.image.load("immagini/sangue.png")
+    sangue = pygame.transform.scale(sangue, (100, 100))
     cuore = pygame.transform.scale(pygame.image.load("immagini/cuore.png"), (10, 10))
-    mezzocuore = pygame.transform.scale(pygame.image.load("immagini/mezzocuore.png"), (10, 10))
+    mezzocuore = pygame.image.load("immagini/mezzocuore.png")
     return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, mezzocuore
 
 
@@ -80,7 +80,6 @@ def GestisciMovimento(tasti, x, y, velocita):
     if tasti[pygame.K_s] and y < ALTEZZASCHERMO - 64:
         y += velocita
     return x, y
-
 
 def SparaProiettile(x, y, mouseX, mouseY, listaProiettili):
     angoloRad = math.atan2(mouseY - (y+32), mouseX - (x+32))
@@ -156,9 +155,10 @@ def GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie):
         schermo.blit(zImg, zRect.topleft)
 
 
-def CollisioniZombie(ListaZombie, listaProiettili):
+def CollisioniZombie(ListaZombie, listaProiettili ):
     daRimuovereZ = []
     daRimuovereP = []
+
     for z in ListaZombie:
         rectZ = pygame.Rect(z[0], z[1], 40, 43)
         for p in listaProiettili:
@@ -166,12 +166,24 @@ def CollisioniZombie(ListaZombie, listaProiettili):
             if rectZ.colliderect(rectP):
                 daRimuovereZ.append(z)
                 daRimuovereP.append(p)
+                ListaSangue.append([z[0], z[1], pygame.time.get_ticks()])
+
     for z in daRimuovereZ:
         if z in ListaZombie:
             ListaZombie.remove(z)
+
     for p in daRimuovereP:
         if p in listaProiettili:
             listaProiettili.remove(p)
+
+
+def GestisciSangue(ListaSangue):
+    tempoAttuale = pygame.time.get_ticks()
+    for sanguePos in ListaSangue: 
+        if tempoAttuale - sanguePos[2] <= 3000:
+            schermo.blit(sangue, (sanguePos[0] - 40, sanguePos[1] - 43))
+        else:
+            ListaSangue.remove(sanguePos)
 
 
 def AumentoSpawnZombie(tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie):
@@ -184,8 +196,7 @@ def AumentoSpawnZombie(tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, Lis
         tempoUltimoSpawn = pygame.time.get_ticks()
     return tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie
 
-def GestisciSangue():
-    pass
+
 
 def GestisciVita():
     pass
@@ -212,6 +223,11 @@ velocitaZombie = 2
 tempoUltimoSpawn = 0
 frequenzaSpawn = 2000
 tempoUltimoAumento = 0
+
+sangueMostrato = False
+tempoSangue = 0
+ListaSangue = []
+
 
 clock = pygame.time.Clock()
 gameOver = False
@@ -266,7 +282,9 @@ while not gameOver:
                 tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie
             )
             GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
+            GestisciSangue(ListaSangue)
 
+        
     pygame.display.update()
     clock.tick(120)
 
