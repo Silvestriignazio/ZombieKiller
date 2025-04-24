@@ -248,12 +248,13 @@ def CuoriCasuali():
 
 def FulminiCasuali():
     pass
+    
 
 def ColpiCausali():
     pass
 
 
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore = CaricaImmagini()
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine = CaricaImmagini()
 
 mappaCorrente = None
 spazioPremuto = False
@@ -290,7 +291,6 @@ contatoreDanno = 0
 tempoUltimoDanno = pygame.time.get_ticks()
 
 
-
 clock = pygame.time.Clock()
 gameOver = False
 
@@ -315,7 +315,7 @@ while not gameOver:
                 ricarica = True
                 ultimaRicarica = time.time()
 
-    if ricarica and time.time() - ultimaRicarica >= 3:
+    if ricarica and time.time() - ultimaRicarica >= 2:
         proiettili_rimanenti = maxProiettili
         ricarica = False
 
@@ -345,6 +345,8 @@ while not gameOver:
             cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
             GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
             schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
+            
+
 
 
 
