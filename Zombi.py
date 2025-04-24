@@ -34,8 +34,8 @@ def CaricaImmagini():
     sangue = pygame.image.load("immagini/sangue.png")
     sangue = pygame.transform.scale(sangue, (100, 100))
     cuore = pygame.transform.scale(pygame.image.load("immagini/cuore.png"), (70, 70))
-    mezzocuore = pygame.transform.scale(pygame.image.load("immagini/mezzocuore.png"), (50, 65))
-    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, mezzocuore
+    fulmine = pygame.transform.scale(pygame.image.load("immagini/fulmine.png"), (70, 70))
+    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine
 
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
@@ -99,24 +99,28 @@ def GestisciProiettili(listaProiettili, velocitaProiettile):
             restanti.append(p)
     listaProiettili[:] = restanti
 
-def InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica):
+def InfoProiettili(schermo, proiettiliRimanenti, ricarica, ultimaRicarica):
     font = pygame.font.Font("font/ZOMBIE.TTF", 36)
-    testoColpi = font.render(f"Colpi {proiettili_rimanenti}", True, (255,255,255))
+    testoColpi = font.render(F"Colpi {proiettiliRimanenti}", True, (255,255,255))
     schermo.blit(testoColpi, (10,10))
+    if proiettiliRimanenti == 0:
+        testoColpi = font.render(F"Colpi {proiettiliRimanenti}", True, (255,0,0))
+        schermo.blit(testoColpi, (10,10))
     if ricarica:
         tempo = max(0, 2 - int(time.time() - ultimaRicarica))
-        testoRicarica = font.render(f"Ricarica {tempo}s", True, (255,0,0))
+        testoRicarica = font.render(F"Ricarica {tempo}s", True, (255,0,0))
         schermo.blit(testoRicarica, (10,50))
 
-def SpawnZombie():
+def SpawnZombie(partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, partenzaDx, fineDX):
     lato = random.choice(["su","giu","sinistra","destra"])
     if lato == "su":
-        return [random.randint(0, LARGHEZZASCHERMO), -50]
+        return [random.randint(partenzaSu, fineSu), -50]
     if lato == "giu":
-        return [random.randint(0, LARGHEZZASCHERMO), ALTEZZASCHERMO + 50]
+        return [random.randint(partenzaGiu, fineGiu), ALTEZZASCHERMO + 50]
     if lato == "sinistra":
-        return [-50, random.randint(0, ALTEZZASCHERMO)]
-    return [LARGHEZZASCHERMO + 50, random.randint(0, ALTEZZASCHERMO)]
+        return [-50, random.randint(partenzaSx, fineSx)]
+    if lato == "destra":
+        return [LARGHEZZASCHERMO + 50, random.randint(partenzaDx, fineDX)]
 
 def GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie):
     centroX = giocatoreX + 32
@@ -186,15 +190,23 @@ def GestisciSangue(ListaSangue):
             ListaSangue.remove(sanguePos)
 
 
-def AumentoSpawnZombie(tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie):
-    if pygame.time.get_ticks() - tempoUltimoAumento >= 15000:
-        if frequenzaSpawn > 500:
-            frequenzaSpawn -= 500
-        tempoUltimoAumento = pygame.time.get_ticks()
-    if pygame.time.get_ticks() - tempoUltimoSpawn >= frequenzaSpawn:
-        ListaZombie.append(SpawnZombie())
+def AumentoSpawnZombie(tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataOndata, partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, partenzaDx, fineDX ):
+
+    if pygame.time.get_ticks() - tempoUltimaOndata >= 15000: # Controlla se sono passati 15 secondi dall'ultima ondata
+    
+        for _ in range(10):  # Aggiunge una l'ondata di zombie
+            ListaZombie.append(SpawnZombie(partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, partenzaDx, fineDX))
+        
+        # Imposta il tempo dell'ultima ondata
+        tempoUltimaOndata = pygame.time.get_ticks()
+    
+    # Gestione  dello spawn 
+    if pygame.time.get_ticks() - tempoUltimoSpawn >= durataOndata:
+        ListaZombie.append(SpawnZombie(partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, partenzaDx, fineDX))
         tempoUltimoSpawn = pygame.time.get_ticks()
-    return tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie
+
+    return tempoUltimoSpawn, ListaZombie, tempoUltimaOndata
+
 
 
 def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno):
@@ -231,10 +243,17 @@ def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, c
     return cuori, tempoUltimoDanno, contatoreDanno
 
 
+def CuoriCasuali():
+    pass 
+
+def FulminiCasuali():
+    pass
+
+def ColpiCausali():
+    pass
 
 
-
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, mezzocuore = CaricaImmagini()
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore = CaricaImmagini()
 
 mappaCorrente = None
 spazioPremuto = False
@@ -242,6 +261,7 @@ spazioPremuto = False
 giocatoreX = 300
 giocatoreY = 300
 velocita = 5
+velocitaZombie = 2
 
 listaProiettili = []
 maxProiettili = 20
@@ -251,11 +271,15 @@ ultimoColpo = time.time()
 ultimaRicarica = 0
 ricarica = False
 
-ListaZombie = []
+
 velocitaZombie = 2
-tempoUltimoSpawn = 0
 frequenzaSpawn = 2000
-tempoUltimoAumento = 0
+tempoUltimoSpawn = pygame.time.get_ticks()
+frequenzaSpawn = 2000 
+tempoUltimaOndata = 0
+durataOndata = 5000
+ListaZombie = [] 
+
 
 sangueMostrato = False
 tempoSangue = 0
@@ -308,7 +332,6 @@ while not gameOver:
             tasti = pygame.key.get_pressed()
             giocatoreX, giocatoreY = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
             giocatoreRuotato, giocatoreRett = RuotaVersoMouse(personaggioBase, giocatoreX, giocatoreY, *pygame.mouse.get_pos())
-            schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
             GestisciProiettili(listaProiettili, velocitaProiettile)
             for p in listaProiettili:
                 img = pygame.transform.rotate(proiettile, p[4])
@@ -316,12 +339,12 @@ while not gameOver:
                 schermo.blit(img, rect.topleft)
             CollisioniZombie(ListaZombie, listaProiettili)
             InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica)
-            tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie = AumentoSpawnZombie(
-                tempoUltimoSpawn, frequenzaSpawn, tempoUltimoAumento, ListaZombie
-            )
-            GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
+            tempoUltimoSpawn, ListaZombie, tempoUltimaOndata = AumentoSpawnZombie(
+                tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataOndata,0, LARGHEZZASCHERMO, 0, LARGHEZZASCHERMO, 0, ALTEZZASCHERMO, 0, ALTEZZASCHERMO)
             GestisciSangue(ListaSangue)
             cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
+            GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
+            schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
 
 
 
