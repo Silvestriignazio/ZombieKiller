@@ -371,16 +371,7 @@ while not gameOver:
             cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
             GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
             schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
-<<<<<<< HEAD
             tempoUltimoCuore, CuorePos, CuoreVisibile, cuori = CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocatoreY, cuori, maxCuori)
-=======
->>>>>>> e618b9fdff35f16acd440fd0a5e6cd74e12568a2
-            
-
-
-
-
-        
     pygame.display.update()
     clock.tick(120)
 
