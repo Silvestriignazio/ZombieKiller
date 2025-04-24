@@ -15,9 +15,9 @@ pygame.display.set_caption('ZOMBI KILLER')
 schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO))
 
 DizionarioMappe = {
-    1: pygame.image.load("mappe/mappa1.png"),
-    2: pygame.image.load("mappe/mappa2.png"),
-    3: pygame.image.load("mappe/mappa3.png")
+    1: pygame.image.load("ProgettoAprile/mappe/mappa1.png"),
+    2: pygame.image.load("ProgettoAprile/mappe/mappa2.png"),
+    3: pygame.image.load("ProgettoAprile/mappe/mappa3.png")
 }
 MiniMappe = {
     1: pygame.transform.scale(DizionarioMappe[1], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
@@ -27,11 +27,11 @@ MiniMappe = {
 
 
 def CaricaImmagini():
-    schermataTitolo = pygame.image.load("immagini/titolo.png")
-    sfondoMappe = pygame.image.load("immagini/sfondoMappe.png")
-    personaggio = pygame.image.load("immagini/personaggio.png")
-    proiettile = pygame.transform.scale(pygame.image.load("immagini/weapon_gun.png"), (10, 10))
-    zombie = pygame.image.load("immagini/zombie.png")
+    schermataTitolo = pygame.image.load("ProgettoAprile/immagini/titolo.png")
+    sfondoMappe = pygame.image.load("ProgettoAprile/immagini/sfondoMappe.png")
+    personaggio = pygame.image.load("ProgettoAprile/immagini/personaggio.png")
+    proiettile = pygame.transform.scale(pygame.image.load("ProgettoAprile/immagini/weapon_gun.png"), (10, 10))
+    zombie = pygame.image.load("ProgettoAprile/immagini/zombie.png")
     return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie
 
 
@@ -99,7 +99,7 @@ def GestisciProiettili(listaProiettili, velocitaProiettile):
 
 
 def InfoProiettili(schermo, proiettili_rimanenti, ricarica, ultimaRicarica):
-    font = pygame.font.Font("font/ZOMBIE.TTF", 36)
+    font = pygame.font.Font("ProgettoAprile/font/ZOMBIE.TTF", 36)
     testoColpi = font.render(f"Colpi {proiettili_rimanenti}", True, (255,255,255))
     schermo.blit(testoColpi, (10,10))
     if ricarica:
@@ -121,15 +121,37 @@ def SpawnZombie():
 def GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie):
     centroX = giocatoreX + 32
     centroY = giocatoreY + 32
-    for z in ListaZombie:
-        if z[0] < centroX:
-            z[0] += velocitaZombie
-        elif z[0] > centroX:
-            z[0] -= velocitaZombie
-        if z[1] < centroY:
-            z[1] += velocitaZombie
-        elif z[1] > centroY:
-            z[1] -= velocitaZombie
+    distanza_minima = 40
+
+    # Aggiorna le posizioni con attrazione + repulsione
+    for i, z in enumerate(ListaZombie):
+        # Direzione verso il giocatore
+        direzioneX = centroX - z[0]
+        direzioneY = centroY - z[1]
+        distanza = math.hypot(direzioneX, direzioneY)
+        if distanza != 0:
+            direzioneX /= distanza
+            direzioneY /= distanza
+
+        # Aggiungi direzione verso il giocatore
+        movimentoX = direzioneX * velocitaZombie
+        movimentoY = direzioneY * velocitaZombie
+
+        # Aggiungi forza repulsiva da altri zombie
+        for j, altro in enumerate(ListaZombie):
+            if i != j:
+                dx = z[0] - altro[0]
+                dy = z[1] - altro[1]
+                distanza_z = math.hypot(dx, dy)
+                if distanza_z < distanza_minima and distanza_z > 0:
+                    # Spingi lo zombie lontano
+                    repulsione = (distanza_minima - distanza_z) / distanza_minima
+                    movimentoX += (dx / distanza_z) * repulsione * velocitaZombie
+                    movimentoY += (dy / distanza_z) * repulsione * velocitaZombie
+
+        z[0] += movimentoX
+        z[1] += movimentoY
+
         zImg, zRect = RotazioneZombie(zombie, z[0], z[1], giocatoreX, giocatoreY)
         schermo.blit(zImg, zRect.topleft)
 
