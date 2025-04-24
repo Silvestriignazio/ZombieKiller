@@ -211,7 +211,7 @@ giocatoreY = 300
 velocita = 5
 
 listaProiettili = []
-maxProiettili = 12
+maxProiettili = 20
 proiettili_rimanenti = maxProiettili
 velocitaProiettile = 10
 ultimoColpo = time.time()
