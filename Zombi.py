@@ -14,6 +14,7 @@ ALTEZZASCHERMO = 796
 pygame.display.set_caption('ZOMBI KILLER')
 schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO))
 
+
 DizionarioMappe = {
     1: pygame.image.load("mappe/mappa1.png"),
     2: pygame.image.load("mappe/mappa2.png"),
@@ -37,9 +38,9 @@ def CaricaImmagini():
     cuoreBonus = pygame.transform.scale(pygame.image.load("immagini/cuore.png"), (50, 50))
     fulmine = pygame.transform.scale(pygame.image.load("immagini/fulmine.png"), (50, 50))
     rifornimenti = pygame.transform.scale(pygame.image.load("immagini/risorse.png"), (40, 40))
+    GameOver = pygame.transform.scale(pygame.image.load("immagini/GAMEOVER.png"), (700, 700))
 
-    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti
-
+    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
     dx = mouseX - x
@@ -115,12 +116,9 @@ def GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, Zombi
         schermo.blit(testoRicarica, (130,10))
         schermo.blit(testoRicarica, (130,10))
     TestoScorte = font.render(F"Scorte {scorte}", True, (255,255,255))
-    schermo.blit(TestoScorte, (10, 50))
     TestoKill = font.render(F"Zombie eliminati {ZombieUccisi}", True, (255,255,255))
     schermo.blit(TestoKill, (600, 10))
     schermo.blit(TestoScorte, (10, 50))
-    TestoKill = font.render(F"Zombie eliminati {ZombieUccisi}", True, (255,255,255))
-    schermo.blit(TestoKill, (600, 10))
 
 def SpawnZombie(partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, partenzaDx, fineDX):
     lato = random.choice(["su","giu","sinistra","destra"])
@@ -182,7 +180,6 @@ def CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi):
                 daRimuovereP.append(p)
                 ListaSangue.append([z[0], z[1], pygame.time.get_ticks()])
                 ZombieUccisi +=1
-                ZombieUccisi +=1
 
     for z in daRimuovereZ:
         if z in ListaZombie:
@@ -195,8 +192,6 @@ def CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi):
             listaProiettili.remove(p)
 
     return ZombieUccisi
-
-    
 
 
 def GestisciSangue(ListaSangue):
@@ -347,203 +342,207 @@ def ColpiCasuali(ColpiVisibili, tempoUltimoRifornimento, RifPos, giocatoreX, gio
     return tempoUltimoRifornimento, scorte, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti
 
 
+def StatoIniziale():
+    mappaCorrente = None
+    spazioPremuto = False
 
-mappaCorrente = None
-spazioPremuto = False
+    giocatoreX = 300
+    giocatoreY = 300
+    velocita = 5
 
-giocatoreX = 300
-giocatoreY = 300
-velocita = 5
-velocitaZombie = 2
+    tempoUltimoCuore = pygame.time.get_ticks()
+    CuorePos = (0, 0)
+    CuoreVisibile = False
+    maxCuori = 3
 
-tempoUltimoCuore = pygame.time.get_ticks()
-CuorePos = (0, 0)
-CuoreVisibile = False
-maxCuori = 3
+    tempoUltimoFulmine = pygame.time.get_ticks()
+    FulminePos = (0, 0)
+    FulmineVisibile = False
+    Fulmineattivo = 0
+    raccolto = False
 
-tempoUltimoFulmine = pygame.time.get_ticks()
-FulminePos = (0, 0)
-FulmineVisibile = False
-Fulmineattivo = 0
-raccolto = False
+    tempoUltimoRifornimento = 0
+    ColpiVisibili = False
+    RifPos = (0, 0)
+    Presi = False
+    tempoColpiRaccolti = 0
 
-tempoUltimoRifornimento = 0
-ColpiVisibili = False
-RifPos = (0, 0)
-Presi = False
-tempoColpiRaccolti = 0
+    listaProiettili = []
+    velocitaProiettile = 10
+    scorte = 100
+    caricatore = 20
+    maxCaricatore = 20
+    ultimoColpo = time.time()
+    ultimaRicarica = 0
+    ricarica = False
+    IntervalloSparo = 0.5
+
+    ZombieUccisi = 0
+    velocitaZombie = 2
+    frequenzaSpawn = 2000
+    tempoUltimoSpawn = pygame.time.get_ticks()
+    tempoUltimaOndata = 0
+    durataOndata = 5000
+    ListaZombie = []
+
+    sangueMostrato = False
+    tempoSangue = 0
+    ListaSangue = []
+
+    cuori = 3
+    contatoreDanno = 0
+    tempoUltimoDanno = pygame.time.get_ticks()
+
+    gioco = False
+
+    return (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
+            tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
+            tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
+            tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
+            listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
+            ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
+            ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
+            tempoUltimaOndata, durataOndata, ListaZombie,
+            sangueMostrato, tempoSangue, ListaSangue,
+            cuori, contatoreDanno, tempoUltimoDanno,
+            gioco)
 
 
-listaProiettili = []
-velocitaProiettile = 10
-scorte = 100
-caricatore = 20
-maxCaricatore = 20
-ultimoColpo = time.time()
-ultimaRicarica = 0
-ricarica = False
-IntervalloSparo = 0.5
-
-ZombieUccisi = 0
-ZombieUccisi = 0
-velocitaZombie = 2
-frequenzaSpawn = 2000
-tempoUltimoSpawn = pygame.time.get_ticks()
-frequenzaSpawn = 2000 
-tempoUltimaOndata = 0
-durataOndata = 5000
-ListaZombie = [] 
-
-
-sangueMostrato = False
-tempoSangue = 0
-ListaSangue = []
-
-cuori = 3
-contatoreDanno = 0
-tempoUltimoDanno = pygame.time.get_ticks()
-
-scorte = 100
+(mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
+ tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
+ tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
+ tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
+ listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
+ ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
+ ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
+ tempoUltimaOndata, durataOndata, ListaZombie,
+ sangueMostrato, tempoSangue, ListaSangue,
+ cuori, contatoreDanno, tempoUltimoDanno,
+ gioco) = StatoIniziale()
 
 clock = pygame.time.Clock()
 gameOver = False
 
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti = CaricaImmagini()
+# Carica tutte le immagini
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver = CaricaImmagini()
 
 while not gameOver:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameOver = True
-        spazioPremuto = GestisciSpazio(event, spazioPremuto)
-        if spazioPremuto and mappaCorrente is None:
-            scelta = ScegliMappa(event)
-            if scelta:
-                mappaCorrente = scelta
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and mappaCorrente:
-            mouseX, mouseY = pygame.mouse.get_pos()
-            if  caricatore > 0 and not ricarica and time.time() - ultimoColpo >= IntervalloSparo:
-                SparaProiettile(giocatoreX, giocatoreY, mouseX, mouseY, listaProiettili)
-                caricatore -= 1
-                ultimoColpo = time.time()
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-            if not ricarica and caricatore < 20 :
-                ricarica = True
-                ultimaRicarica = time.time()
-
-    if ricarica and time.time() - ultimaRicarica >= 2:
-        diff = maxCaricatore - caricatore
-        scorte -= diff
-        caricatore += diff
-        ricarica = False
-
-    if not spazioPremuto:
-        schermo.blit(schermataTitolo, (0, 0))
-    elif mappaCorrente is None:
-        schermo.blit(SfondoMappe, (0, 0))
-        schermo.blit(MiniMappe[1], (100, 400))
-        schermo.blit(MiniMappe[2], (580, 400))
-        schermo.blit(MiniMappe[3], (1100, 400))
-    else:
-        schermo.blit(mappaCorrente, (0, 0))
-        if mappaCorrente == DizionarioMappe[1]:
-
-            tasti = pygame.key.get_pressed()
-            giocatoreX, giocatoreY = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
-            giocatoreRuotato, giocatoreRett = RuotaVersoMouse(personaggioBase, giocatoreX, giocatoreY, *pygame.mouse.get_pos())
-            GestisciProiettili(listaProiettili, velocitaProiettile)
-
-            for p in listaProiettili:
-                img = pygame.transform.rotate(proiettile, p[4])
-                rect = img.get_rect(center=(p[0], p[1]))
-                schermo.blit(img, rect.topleft)
-
-            ZombieUccisi = CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi)
-            GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi)
-            ZombieUccisi = CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi)
-            GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi)
-            tempoUltimoSpawn, ListaZombie, tempoUltimaOndata = AumentoSpawnZombie(
-                tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataOndata,0, LARGHEZZASCHERMO, 0, LARGHEZZASCHERMO, 0, ALTEZZASCHERMO, 0, ALTEZZASCHERMO)
-            
-            GestisciSangue(ListaSangue)
-            cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
-            GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
-            schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
-            tempoUltimoCuore, CuorePos, CuoreVisibile, cuori = CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocatoreY, cuori, maxCuori)
-            tempoUltimoFulmine, FulminePos, FulmineVisibile, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto = FulminiCasuali(tempoUltimoFulmine, FulminePos, FulmineVisibile, giocatoreX, giocatoreY, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto)
-            tempoUltimoRifornimento, scorte, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti  = ColpiCasuali(ColpiVisibili, tempoUltimoRifornimento, RifPos, giocatoreX, giocatoreY, scorte, Presi, tempoColpiRaccolti)
         
         
-        if mappaCorrente == DizionarioMappe[2]:
-            tasti = pygame.key.get_pressed()
-            giocatoreX, giocatoreY = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
-            giocatoreRuotato, giocatoreRett = RuotaVersoMouse(personaggioBase, giocatoreX, giocatoreY, *pygame.mouse.get_pos())
-            GestisciProiettili(listaProiettili, velocitaProiettile)
+        if gioco:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and cuori == 0:
+                
+                (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
+                tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
+                tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
+                tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
+                listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
+                ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
+                ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
+                tempoUltimaOndata, durataOndata, ListaZombie,
+                sangueMostrato, tempoSangue, ListaSangue,
+                cuori, contatoreDanno, tempoUltimoDanno,
+                gioco) = StatoIniziale()
 
-            for p in listaProiettili:
-                img = pygame.transform.rotate(proiettile, p[4])
-                rect = img.get_rect(center=(p[0], p[1]))
-                schermo.blit(img, rect.topleft)
+                
+                spazioPremuto = False
+                mappaCorrente = None
+                gioco = False
 
-            ZombieUccisi = CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi)
-            GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi)
-            tempoUltimoSpawn, ListaZombie, tempoUltimaOndata = AumentoSpawnZombie(
-                tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataOndata,330, LARGHEZZASCHERMO, 0, LARGHEZZASCHERMO, 0, ALTEZZASCHERMO, 0, ALTEZZASCHERMO)
             
-            GestisciSangue(ListaSangue)
-            cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
-            GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
-            schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
-            tempoUltimoCuore, CuorePos, CuoreVisibile, cuori = CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocatoreY, cuori, maxCuori)
-            tempoUltimoFulmine, FulminePos, FulmineVisibile, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto = FulminiCasuali(tempoUltimoFulmine, FulminePos, FulmineVisibile, giocatoreX, giocatoreY, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto)
-            tempoUltimoRifornimento, scorte, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti  = ColpiCasuali(ColpiVisibili, tempoUltimoRifornimento, RifPos, giocatoreX, giocatoreY, scorte, Presi, tempoColpiRaccolti) 
-            tasti = pygame.key.get_pressed()
-            giocatoreX, giocatoreY = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
-            giocatoreRuotato, giocatoreRett = RuotaVersoMouse(personaggioBase, giocatoreX, giocatoreY, *pygame.mouse.get_pos())
-            GestisciProiettili(listaProiettili, velocitaProiettile)
-
-            for p in listaProiettili:
-                img = pygame.transform.rotate(proiettile, p[4])
-                rect = img.get_rect(center=(p[0], p[1]))
-                schermo.blit(img, rect.topleft)
-
-            ZombieUccisi = CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi)
-            GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi)
-            tempoUltimoSpawn, ListaZombie, tempoUltimaOndata = AumentoSpawnZombie(
-                tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataOndata,330, LARGHEZZASCHERMO, 0, LARGHEZZASCHERMO, 0, ALTEZZASCHERMO, 0, ALTEZZASCHERMO)
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouseX, mouseY = pygame.mouse.get_pos()
+                if caricatore > 0 and not ricarica and time.time() - ultimoColpo >= IntervalloSparo:
+                    SparaProiettile(giocatoreX, giocatoreY, mouseX, mouseY, listaProiettili)
+                    caricatore -= 1
+                    ultimoColpo = time.time()
             
-            GestisciSangue(ListaSangue)
-            cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
-            GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
-            schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
-            tempoUltimoCuore, CuorePos, CuoreVisibile, cuori = CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocatoreY, cuori, maxCuori)
-            tempoUltimoFulmine, FulminePos, FulmineVisibile, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto = FulminiCasuali(tempoUltimoFulmine, FulminePos, FulmineVisibile, giocatoreX, giocatoreY, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto)
-            tempoUltimoRifornimento, scorte, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti  = ColpiCasuali(ColpiVisibili, tempoUltimoRifornimento, RifPos, giocatoreX, giocatoreY, scorte, Presi, tempoColpiRaccolti) 
-            
-        if mappaCorrente == DizionarioMappe[3]:
-            tasti = pygame.key.get_pressed()
-            giocatoreX, giocatoreY = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
-            giocatoreRuotato, giocatoreRett = RuotaVersoMouse(personaggioBase, giocatoreX, giocatoreY, *pygame.mouse.get_pos())
-            GestisciProiettili(listaProiettili, velocitaProiettile)
-
-            for p in listaProiettili:
-                img = pygame.transform.rotate(proiettile, p[4])
-                rect = img.get_rect(center=(p[0], p[1]))
-                schermo.blit(img, rect.topleft)
-
-            ZombieUccisi = CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi)
-            GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi)
-            tempoUltimoSpawn, ListaZombie, tempoUltimaOndata = AumentoSpawnZombie(
-                tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataOndata, 0, LARGHEZZASCHERMO, 0, LARGHEZZASCHERMO, 0, ALTEZZASCHERMO, 0, ALTEZZASCHERMO)
-            
-            GestisciSangue(ListaSangue)
-            cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
-            GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
-            schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
-            tempoUltimoCuore, CuorePos, CuoreVisibile, cuori = CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocatoreY, cuori, maxCuori)
-            tempoUltimoFulmine, FulminePos, FulmineVisibile, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto = FulminiCasuali(tempoUltimoFulmine, FulminePos, FulmineVisibile, giocatoreX, giocatoreY, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto)
-            tempoUltimoRifornimento, scorte, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti  = ColpiCasuali(ColpiVisibili, tempoUltimoRifornimento, RifPos, giocatoreX, giocatoreY, scorte, Presi, tempoColpiRaccolti) 
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                if not ricarica and caricatore < maxCaricatore and scorte > 0:
+                    ricarica = True
+                    ultimaRicarica = time.time()
+        
+        
+        else:
+            spazioPremuto = GestisciSpazio(event, spazioPremuto)
+            if spazioPremuto and mappaCorrente is None:
+                scelta = ScegliMappa(event)
+                if scelta:
+                    mappaCorrente = scelta
+                    gioco = True
     
+    
+    if not gioco:
+        if not spazioPremuto:
+            schermo.blit(schermataTitolo, (0, 0))
+        elif mappaCorrente is None:
+            schermo.blit(SfondoMappe, (0, 0))
+            schermo.blit(MiniMappe[1], (100, 400))
+            schermo.blit(MiniMappe[2], (580, 400))
+            schermo.blit(MiniMappe[3], (1100, 400))
+    else:
+        if cuori <= 0:
+            schermo.blit(GameOver, (400, 10))
+        else:
+            schermo.blit(mappaCorrente, (0, 0))
+            
+            
+            tasti = pygame.key.get_pressed()
+            giocatoreX, giocatoreY = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
+            
+            
+            giocatoreRuotato, giocatoreRett = RuotaVersoMouse(personaggioBase, giocatoreX, giocatoreY, *pygame.mouse.get_pos())
+            
+            
+            GestisciProiettili(listaProiettili, velocitaProiettile)
+            for p in listaProiettili:
+                img = pygame.transform.rotate(proiettile, p[4])
+                rect = img.get_rect(center=(p[0], p[1]))
+                schermo.blit(img, rect.topleft)
+            
+           
+            GestisciSangue(ListaSangue)
+
+            
+            schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
+
+            
+            ZombieUccisi = CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi)
+            tempoUltimoSpawn, ListaZombie, tempoUltimaOndata = AumentoSpawnZombie(
+                tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataOndata, 
+                0, LARGHEZZASCHERMO, 0, LARGHEZZASCHERMO, 0, ALTEZZASCHERMO, 0, ALTEZZASCHERMO)
+            GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
+            
+            
+            
+        
+            cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
+            
+            
+            
+            
+            tempoUltimoCuore, CuorePos, CuoreVisibile, cuori = CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocatoreY, cuori, maxCuori)
+            tempoUltimoFulmine, FulminePos, FulmineVisibile, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto = FulminiCasuali(
+                tempoUltimoFulmine, FulminePos, FulmineVisibile, giocatoreX, giocatoreY, 
+                velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto)
+            tempoUltimoRifornimento, scorte, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti = ColpiCasuali(
+                ColpiVisibili, tempoUltimoRifornimento, RifPos, giocatoreX, giocatoreY, 
+                scorte, Presi, tempoColpiRaccolti)
+            
+            
+            if ricarica and time.time() - ultimaRicarica >= 2:
+                diff = min(maxCaricatore - caricatore, scorte)
+                scorte -= diff
+                caricatore += diff
+                ricarica = False
+            
+            
+            GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi)
+
     pygame.display.update()
-    clock.tick(144)
+    clock.tick(120)
 
 pygame.quit()
