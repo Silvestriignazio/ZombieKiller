@@ -3,6 +3,7 @@ import os
 import math
 import time
 import random
+import datetime
 
 os.system("cls")
 pygame.init()
@@ -18,14 +19,15 @@ schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO))
 DizionarioMappe = {
     1: pygame.image.load("mappe/mappa1.png"),
     2: pygame.image.load("mappe/mappa2.png"),
-    3: pygame.image.load("mappe/mappa3.png")
+    3: pygame.image.load("mappe/mappa3.png"),
+    "m": pygame.image.load("mappe/aggiuntaMappa.png")
 }
 MiniMappe = {
     1: pygame.transform.scale(DizionarioMappe[1], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
     2: pygame.transform.scale(DizionarioMappe[2], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
-    3: pygame.transform.scale(DizionarioMappe[3], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA))
+    3: pygame.transform.scale(DizionarioMappe[3], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
+    "m": pygame.transform.scale(DizionarioMappe["m"], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA))
 }
-
 def CaricaImmagini():
     schermataTitolo = pygame.image.load("immagini/titolo.png")
     sfondoMappe = pygame.image.load("immagini/sfondoMappe.png")
@@ -43,9 +45,9 @@ def CaricaImmagini():
     due = pygame.transform.scale(pygame.image.load("immagini/due.png"), (50, 50))
     tre = pygame.transform.scale(pygame.image.load("immagini/tre.png"), (50, 50))
     quattro = pygame.transform.scale(pygame.image.load("immagini/quattro.png"), (50, 50))
+    nuovaMappa = pygame.transform.scale(pygame.image.load("mappe/aggiuntaMappa.png"), (300, 250))
 
-
-    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro
+    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
     dx = mouseX - x
@@ -401,6 +403,12 @@ def StatoIniziale():
 
     font = pygame.font.Font("font/ZOMBIE.TTF", 36)
 
+    nomeGiocatore = ""
+    inserendoNome = True
+    nomeInserito = False
+
+    Salvato = False
+
     return (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
             tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
             tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
@@ -411,10 +419,35 @@ def StatoIniziale():
             tempoUltimaOndata, durataOndata, ListaZombie,
             sangueMostrato, tempoSangue, ListaSangue,
             cuori, contatoreDanno, tempoUltimoDanno,
-            gioco, font)
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato)
 
 
+def InserisciNome(eventi, schermo, font, nomeGiocatore, nomeInserito, Salvato):
+    
+    RectCasella = pygame.Rect(500, 90, 400, 60)
+    for evento in eventi:
+        if evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_RETURN and nomeGiocatore.strip() != "":
+                nomeInserito = True
+                Salvato = True
+            elif evento.key == pygame.K_BACKSPACE:
+                nomeGiocatore = nomeGiocatore[:-1]
+            else:
+                if len(nomeGiocatore) < 15 and evento.unicode.isprintable(): #questa funzione serve in modo tale che vengano scritti solo caratteri visibili
+                    nomeGiocatore += evento.unicode
 
+
+    Nome = font.render("COME TI CHIAMI?:", True, (255,255,255,255))
+    schermo.blit(Nome, (560, 40))
+
+    # va a disegnare a schermo il rettangolo
+    pygame.draw.rect(schermo, (184, 20, 20), RectCasella, 3, 5)
+
+    # va a scrivere il testo dentro la casella
+    Testo = font.render(nomeGiocatore, True, (255,255,255,255))
+    schermo.blit(Testo, (505, 100))
+
+    return nomeGiocatore.strip(), nomeInserito, Salvato
 
 
 def CreaMappa():
@@ -426,19 +459,94 @@ def CreaMappa():
     return mappa
     
 mappaTile = {
-    "A" : pygame.image.load("immagini/prato.png"),
-    "B" : pygame.image.load("immagini/fiume.png"),
-    "C" : pygame.image.load("immagini/sentiero.png"),
-    "D" : pygame.image.load("immagini/strada.png"),
-    "E" : pygame.image.load("immagini/muro.png")
+    "A" : pygame.image.load("tile/prato.png"),
+    "B" : pygame.image.load("tile/fiume.png"),
+    "C" : pygame.image.load("tile/sentiero.png"),
+    "D" : pygame.image.load("tile/strada.png"),
+    "E" : pygame.image.load("tile/muro.png")
     }
+
 
 def DisegnaMappa(mappa):
     for y, riga in enumerate(mappa):
         for x, tile in enumerate(riga):
             if tile in mappaTile:
                 # Disegna il tile corrispondente alla lettera
-                schermo.blit(mappaTile[tile], (x * 32, y * 32))  # Ad esempio, tile di 32x32px
+                schermo.blit(mappaTile[tile], (x * 32, y * 32))   
+
+
+def DataEOraPartita():
+    data = datetime.datetime.now()
+    data1 = datetime.date.strftime(data, "%d/%m/%y")
+    ora = datetime.date.strftime(data, "%H:%M:%S")
+    return data1, ora
+
+def AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi):
+    data1, ora = DataEOraPartita()
+
+    file = open("File/Classifica.txt", "r", encoding="utf-8")
+    contenuto = file.read()
+    file.close()
+
+    riga = f"Nome: {nomeGiocatore} - Uccisioni: {ZombieUccisi} - Data: {data1} - Ora: {ora}\n"
+
+    if nomeGiocatore not in contenuto:
+        file = open("File/Classifica.txt", "a", encoding="utf-8")
+        file.write(riga)
+        file.close()
+    else:
+        file = open("File/Classifica.txt", "w", encoding="utf-8")
+        for linea in contenuto.splitlines():
+            if nomeGiocatore in linea:
+                # Estrae le uccisioni della partita
+                parti = linea.split(" - ")
+                uccisioniAttuali = 0
+                for parte in parti:
+                    if "Uccisioni:" in parte:
+                        uccisioniAttuali = int(parte.replace("Uccisioni:", "").strip()) # si estrae il valore solo per la riga che si sta controllando
+
+                if ZombieUccisi > uccisioniAttuali:
+                    file.write(riga)
+                else:
+                    file.write(linea + "\n")  # Se non ci sono cambiamenti viene mantenuta la riga attuale
+            
+            else:
+                file.write(linea + "\n")
+        
+        file.close()
+
+    
+    OrdinaClassifica()
+
+# estrae le uccisioni da qualsiasi riga
+def estraiUccisioni(riga):
+    parti = riga.split(" - ")
+    for parte in parti:
+        if "Uccisioni:" in parte:
+            return int(parte.replace("Uccisioni:", "").strip())
+    return 0
+
+
+def OrdinaClassifica(crescente=False):
+    file = open("File/Classifica.txt", "r", encoding="utf-8")
+    righe = file.read().splitlines()
+    file.close()
+
+
+    for k in range(len(righe), 0, -1):
+        for i in range(0, k-1):
+            if crescente:
+                if estraiUccisioni(righe[i]) > estraiUccisioni(righe[i+1]):
+                    righe[i], righe[i+1] = righe[i+1], righe[i]
+            else:
+                if estraiUccisioni(righe[i]) < estraiUccisioni(righe[i+1]):
+                    righe[i], righe[i+1] = righe[i+1], righe[i]
+
+    # vado a sovrascrivere il tutto 
+    file = open("File/Classifica.txt", "w", encoding="utf-8")
+    for riga in righe:
+        file.write(riga + "\n")
+    file.close()
 
 
 
@@ -452,29 +560,24 @@ def DisegnaMappa(mappa):
  tempoUltimaOndata, durataOndata, ListaZombie,
  sangueMostrato, tempoSangue, ListaSangue,
  cuori, contatoreDanno, tempoUltimoDanno,
- gioco, font) = StatoIniziale()
+ gioco, font,nomeGiocatore, inserendoNome, nomeInserito, Salvato) = StatoIniziale()
 
 clock = pygame.time.Clock()
 gameOver = False
 
 
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver,uno,due,tre,quattro = CaricaImmagini()
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa = CaricaImmagini()
 
-nome_giocatore = ""
-inserendo_nome = True
-eventi = pygame.event.get()
 
 while not gameOver:
-    for event in pygame.event.get():
+    eventi = pygame.event.get()
+
+    for event in eventi:
         if event.type == pygame.QUIT:
             gameOver = True
-
-        
-        
         
         if gioco:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and cuori == 0:
-                
                 (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
                 tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
                 tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
@@ -485,12 +588,7 @@ while not gameOver:
                 tempoUltimaOndata, durataOndata, ListaZombie,
                 sangueMostrato, tempoSangue, ListaSangue,
                 cuori, contatoreDanno, tempoUltimoDanno,
-                gioco, font) = StatoIniziale()
-
-                
-                spazioPremuto = False
-                mappaCorrente = None
-                gioco = False
+                gioco, font,nomeGiocatore, inserendoNome, nomeInserito,Salvato) = StatoIniziale()
 
             
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -505,38 +603,42 @@ while not gameOver:
                     ricarica = True
                     ultimaRicarica = time.time()
         
-        
         else:
             spazioPremuto = GestisciSpazio(event, spazioPremuto)
-            if spazioPremuto and mappaCorrente is None:
-                scelta = ScegliMappa(event)
-                if scelta:
-                    mappaCorrente = scelta
-                    gioco = True
-    
-    
+
     if not gioco:
         if not spazioPremuto:
             schermo.blit(schermataTitolo, (0, 0))
         elif mappaCorrente is None:
             schermo.blit(SfondoMappe, (0, 0))
-            schermo.blit(MiniMappe[1], (100, 400))
-            schermo.blit(MiniMappe[2], (580, 400))
-            schermo.blit(MiniMappe[3], (1100, 400))
-            schermo.blit(uno, (150, 500))
+            schermo.blit(MiniMappe[1], (30, 400))
+            schermo.blit(MiniMappe[2], (400, 400))
+            schermo.blit(MiniMappe[3], (760, 400))
+            schermo.blit(MiniMappe["m"], (1120, 400))
+            schermo.blit(uno, (140, 650))
+            schermo.blit(due, (525, 650))
+            schermo.blit(tre, (890, 650))
+            schermo.blit(quattro, (1255, 650))
+
+            if not nomeInserito:
+                nomeGiocatore, nomeInserito, Salvato = InserisciNome(eventi, schermo, font, nomeGiocatore, nomeInserito, Salvato)
+                    
+            else:
+                for event in eventi:
+                    scelta = ScegliMappa(event)
+                    if scelta:
+                        mappaCorrente = scelta
+                        gioco = True
     else:
         if cuori <= 0:
             schermo.blit(GameOver, (400, 10))
         else:
             schermo.blit(mappaCorrente, (0, 0))
             
-            
             tasti = pygame.key.get_pressed()
             giocatoreX, giocatoreY = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
             
-            
             giocatoreRuotato, giocatoreRett = RuotaVersoMouse(personaggioBase, giocatoreX, giocatoreY, *pygame.mouse.get_pos())
-            
             
             GestisciProiettili(listaProiettili, velocitaProiettile)
             for p in listaProiettili:
@@ -544,26 +646,17 @@ while not gameOver:
                 rect = img.get_rect(center=(p[0], p[1]))
                 schermo.blit(img, rect.topleft)
             
-           
             GestisciSangue(ListaSangue)
 
-            
             schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
 
-            
             ZombieUccisi = CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi)
             tempoUltimoSpawn, ListaZombie, tempoUltimaOndata = AumentoSpawnZombie(
                 tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataOndata, 
                 0, LARGHEZZASCHERMO, 0, LARGHEZZASCHERMO, 0, ALTEZZASCHERMO, 0, ALTEZZASCHERMO)
             GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
             
-            
-            
-        
             cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
-            
-            
-            
             
             tempoUltimoCuore, CuorePos, CuoreVisibile, cuori = CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocatoreY, cuori, maxCuori)
             tempoUltimoFulmine, FulminePos, FulmineVisibile, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto = FulminiCasuali(
@@ -573,17 +666,19 @@ while not gameOver:
                 ColpiVisibili, tempoUltimoRifornimento, RifPos, giocatoreX, giocatoreY, 
                 scorte, Presi, tempoColpiRaccolti)
             
-            
             if ricarica and time.time() - ultimaRicarica >= 2:
                 diff = min(maxCaricatore - caricatore, scorte)
                 scorte -= diff
                 caricatore += diff
                 ricarica = False
             
-            
             GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi, font)
+
 
     pygame.display.update()
     clock.tick(120)
+
+AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
+
 
 pygame.quit()
