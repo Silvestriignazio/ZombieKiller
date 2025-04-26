@@ -47,8 +47,9 @@ def CaricaImmagini():
     quattro = pygame.transform.scale(pygame.image.load("immagini/quattro.png"), (50, 50))
     nuovaMappa = pygame.transform.scale(pygame.image.load("mappe/aggiuntaMappa.png"), (300, 250))
     boss = pygame.transform.scale(pygame.image.load("immagini/boss.png"), (100, 100))
+    mirino = pygame.transform.scale(pygame.image.load("immagini\mirino.png"), (50, 50))
 
-    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss
+    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss, mirino
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
     dx = mouseX - x
@@ -636,7 +637,9 @@ def CollisioneBoss(ListaBoss, listaProiettili, ListaSangue):
         if b in ListaBoss:
             ListaBoss.remove(b)
 
-
+def DisegnaMirino(mirino, mouseX, mouseY):
+    rett = mirino.get_rect(center=(mouseX, mouseY))
+    schermo.blit(mirino, rett)
 
 clock = pygame.time.Clock()
 gameOver = False
@@ -655,7 +658,7 @@ gameOver = False
             gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss) = StatoIniziale()
 
 
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss = CaricaImmagini()
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss,mirino = CaricaImmagini()
 
 
 
@@ -668,17 +671,21 @@ while not gameOver:
         
         if gioco:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and cuori == 0:
+                if Salvato == False:
+                    AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
+                    Salvato = True
+            
                 (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
-            tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
-            tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
-            tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
-            listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
-            ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
-            ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
-            tempoUltimaOndata, durataOndata, ListaZombie,
-            sangueMostrato, tempoSangue, ListaSangue,
-            cuori, contatoreDanno, tempoUltimoDanno,
-            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss) = StatoIniziale()
+                tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
+                tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
+                tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
+                listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
+                ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
+                ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
+                tempoUltimaOndata, durataOndata, ListaZombie,
+                sangueMostrato, tempoSangue, ListaSangue,
+                cuori, contatoreDanno, tempoUltimoDanno,
+                gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss) = StatoIniziale()
 
             
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -728,6 +735,9 @@ while not gameOver:
     else:
         if cuori <= 0:
             schermo.blit(GameOver, (400, 10))
+            if Salvato == False:
+                AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
+                Salvato = True
         else:
             if MioFile == False:
                 schermo.blit(mappaCorrente, (0, 0))
@@ -736,8 +746,6 @@ while not gameOver:
                 mappa = CreaMappa(mappaCorrente)
                 DisegnaMappa(mappa)
             
-            
-
             tasti = pygame.key.get_pressed()
             giocatoreX, giocatoreY = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
             
@@ -790,13 +798,15 @@ while not gameOver:
                 caricatore += diff
                 ricarica = False
             
+
+            mouseX, mouseY = pygame.mouse.get_pos()
+            DisegnaMirino(mirino, mouseX, mouseY)
             GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi, font)
+            
 
 
     pygame.display.update()
     clock.tick(120)
-
-AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
 
 
 pygame.quit()
