@@ -46,8 +46,9 @@ def CaricaImmagini():
     tre = pygame.transform.scale(pygame.image.load("immagini/tre.png"), (50, 50))
     quattro = pygame.transform.scale(pygame.image.load("immagini/quattro.png"), (50, 50))
     nuovaMappa = pygame.transform.scale(pygame.image.load("mappe/aggiuntaMappa.png"), (300, 250))
+    boss = pygame.transform.scale(pygame.image.load("immagini/boss.png"), (100, 100))
 
-    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa
+    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
     dx = mouseX - x
@@ -228,7 +229,7 @@ def AumentoSpawnZombie(tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataO
 
 
 
-def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno):
+def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno, n):
     rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 49, 43)
     tempoAttuale = pygame.time.get_ticks()
     dannoSubito = False
@@ -240,7 +241,7 @@ def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, c
 
     if dannoSubito and tempoAttuale - tempoUltimoDanno >= 2000:
         if cuori > 0:
-            contatoreDanno += 1 
+            contatoreDanno += n 
             if contatoreDanno >= 2:
                 cuori -= 1
                 contatoreDanno = 0
@@ -415,6 +416,11 @@ def StatoIniziale():
 
     MioFile = False
 
+    tempoUltimoBoss = 0
+    ListaBoss = []
+    vitaBoss = 10
+    velocitaBoss = 3
+
     return (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
             tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
             tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
@@ -425,7 +431,7 @@ def StatoIniziale():
             tempoUltimaOndata, durataOndata, ListaZombie,
             sangueMostrato, tempoSangue, ListaSangue,
             cuori, contatoreDanno, tempoUltimoDanno,
-            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile)
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss)
 
 
 def InserisciNome(eventi, schermo, font, nomeGiocatore, nomeInserito, Salvato):
@@ -556,24 +562,101 @@ def OrdinaClassifica(crescente=False):
     file.close()
 
 
+def SpawnBoss(partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, partenzaDx, fineDX, VitaBoss):
+    lato = random.choice(["su", "giu", "sinistra", "destra"])
+    if lato == "su":
+        return [random.randint(partenzaSu, fineSu), -50, VitaBoss]
+    if lato == "giu":
+        return [random.randint(partenzaGiu, fineGiu), ALTEZZASCHERMO + 50, VitaBoss]
+    if lato == "sinistra":
+        return [-50, random.randint(partenzaSx, fineSx), VitaBoss]
+    if lato == "destra":
+        return [LARGHEZZASCHERMO + 50, random.randint(partenzaDx, fineDX), VitaBoss]
 
-(mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
- tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
- tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
- tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
- listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
- ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
- ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
- tempoUltimaOndata, durataOndata, ListaZombie,
- sangueMostrato, tempoSangue, ListaSangue,
- cuori, contatoreDanno, tempoUltimoDanno,
- gioco, font,nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile) = StatoIniziale()
+
+def GestisciBoss(ListaBoss, giocatoreX, giocatoreY, velocitaBoss, boss):
+    centroX = giocatoreX + 32
+    centroY = giocatoreY + 32
+    distanzaMinima = 40
+    distanzaMinima_sq = distanzaMinima * distanzaMinima
+
+    for i, z in enumerate(ListaBoss):
+        dxGiocatore = centroX - z[0]
+        dyGiocatore = centroY - z[1]
+        distanza_giocatore_quadrato = dxGiocatore**2 + dyGiocatore**2
+
+        if distanza_giocatore_quadrato != 0:
+            inv_distanza = 1 / (distanza_giocatore_quadrato**0.5)
+            movimentoX = dxGiocatore * inv_distanza * velocitaBoss
+            movimentoY = dyGiocatore * inv_distanza * velocitaBoss
+        else:
+            movimentoX, movimentoY = 0, 0
+
+        
+        for j, altro in enumerate(ListaBoss):
+            if i != j:
+                dx = z[0] - altro[0]
+                dy = z[1] - altro[1]
+                dist_sq = dx**2 + dy**2
+                if 0 < dist_sq < distanzaMinima_sq:
+                    inv_dist = 1 / (dist_sq**0.5)
+                    forza_repulsiva = (distanzaMinima_sq - dist_sq) / distanzaMinima_sq
+                    movimentoX += dx * inv_dist * forza_repulsiva * velocitaBoss
+                    movimentoY += dy * inv_dist * forza_repulsiva * velocitaBoss
+
+        z[0] += movimentoX
+        z[1] += movimentoY
+
+        BImg, BRect = RotazioneZombie(boss, z[0], z[1], giocatoreX, giocatoreY)
+        schermo.blit(BImg, BRect.topleft)
+
+def CollisioneBoss(ListaBoss, listaProiettili, ListaSangue):
+    daRimuovereB = []
+    daRimuovereP = []
+
+    for b in ListaBoss:
+        rectB = pygame.Rect(b[0], b[1], 50, 50)
+        for p in listaProiettili:
+            rectP = pygame.Rect(p[0], p[1], 10, 10)
+            if rectB.colliderect(rectP):
+                b[2] -= 1
+                daRimuovereP.append(p)
+
+        
+        if b[2] <= 0:
+            ListaSangue.append([b[0], b[1], pygame.time.get_ticks()])
+            daRimuovereB.append(b)
+    
+    
+    for p in daRimuovereP:
+        if p in listaProiettili:
+            listaProiettili.remove(p)
+
+    for b in daRimuovereB:
+        if b in ListaBoss:
+            ListaBoss.remove(b)
+
+
 
 clock = pygame.time.Clock()
 gameOver = False
 
 
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa = CaricaImmagini()
+(mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
+            tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
+            tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
+            tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
+            listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
+            ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
+            ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
+            tempoUltimaOndata, durataOndata, ListaZombie,
+            sangueMostrato, tempoSangue, ListaSangue,
+            cuori, contatoreDanno, tempoUltimoDanno,
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss) = StatoIniziale()
+
+
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss = CaricaImmagini()
+
 
 
 while not gameOver:
@@ -586,16 +669,16 @@ while not gameOver:
         if gioco:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and cuori == 0:
                 (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
-                tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
-                tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
-                tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
-                listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
-                ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
-                ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
-                tempoUltimaOndata, durataOndata, ListaZombie,
-                sangueMostrato, tempoSangue, ListaSangue,
-                cuori, contatoreDanno, tempoUltimoDanno,
-                gioco, font,nomeGiocatore, inserendoNome, nomeInserito,Salvato, MieMappe, MioFile) = StatoIniziale()
+            tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
+            tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
+            tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
+            listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
+            ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
+            ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
+            tempoUltimaOndata, durataOndata, ListaZombie,
+            sangueMostrato, tempoSangue, ListaSangue,
+            cuori, contatoreDanno, tempoUltimoDanno,
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss) = StatoIniziale()
 
             
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -648,10 +731,13 @@ while not gameOver:
         else:
             if MioFile == False:
                 schermo.blit(mappaCorrente, (0, 0))
+                tempoDiGioco = pygame.time.get_ticks()
             else:
                 mappa = CreaMappa(mappaCorrente)
                 DisegnaMappa(mappa)
             
+            
+
             tasti = pygame.key.get_pressed()
             giocatoreX, giocatoreY = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
             
@@ -672,8 +758,23 @@ while not gameOver:
                 tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataOndata, 
                 0, LARGHEZZASCHERMO, 0, LARGHEZZASCHERMO, 0, ALTEZZASCHERMO, 0, ALTEZZASCHERMO)
             GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie)
+
+    
+            tempoDiGioco = pygame.time.get_ticks()
+
             
-            cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno)
+            if len(ListaBoss) == 0 and tempoDiGioco - tempoUltimoBoss > random.randint(55000, 60000):
+                bossSpawnato = SpawnBoss(100, LARGHEZZASCHERMO-100, 100, LARGHEZZASCHERMO-100, 100, ALTEZZASCHERMO-100, 100, ALTEZZASCHERMO-100, vitaBoss)
+                ListaBoss.append(bossSpawnato)
+                tempoUltimoBoss = tempoDiGioco
+
+            if len(ListaBoss) > 0:
+                GestisciBoss(ListaBoss, giocatoreX, giocatoreY, velocitaBoss, boss)
+                CollisioneBoss(ListaBoss, listaProiettili, ListaSangue)
+                cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaBoss, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno, n = 2)
+
+            
+            cuori, tempoUltimoDanno, contatoreDanno = GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno, n = 1)
             
             tempoUltimoCuore, CuorePos, CuoreVisibile, cuori = CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocatoreY, cuori, maxCuori)
             tempoUltimoFulmine, FulminePos, FulmineVisibile, velocita, velocitaProiettile, IntervalloSparo, Fulmineattivo, raccolto = FulminiCasuali(
