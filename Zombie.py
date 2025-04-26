@@ -66,21 +66,17 @@ def RotazioneZombie(immagine, zx, zy, giocatoreX, giocatoreY):
     return immagineRuotata, rett
 
 
-def ScegliMappa(event, gioco, MieMappe):
+def ScegliMappa(event):
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_1:
-            gioco = True 
-            return DizionarioMappe[1], gioco
+            return DizionarioMappe[1],1
         elif event.key == pygame.K_2:
-            gioco = True 
-            return DizionarioMappe[2], gioco
+            return DizionarioMappe[2],2
         elif event.key == pygame.K_3:
-            gioco = True 
-            return DizionarioMappe[3], gioco
+            return DizionarioMappe[3],3
         elif event.key == pygame.K_4:
-            MieMappe = True 
-            return SfondoMappe, MieMappe
-    return None
+            return "MieMappe\mappa1.txt" ,4, 
+    return None, None
 
 def GestisciSpazio(event, SpazioPremuto):
     if not SpazioPremuto and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -417,6 +413,8 @@ def StatoIniziale():
 
     Salvato = False
 
+    MioFile = False
+
     return (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
             tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
             tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
@@ -427,7 +425,7 @@ def StatoIniziale():
             tempoUltimaOndata, durataOndata, ListaZombie,
             sangueMostrato, tempoSangue, ListaSangue,
             cuori, contatoreDanno, tempoUltimoDanno,
-            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe)
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile)
 
 
 def InserisciNome(eventi, schermo, font, nomeGiocatore, nomeInserito, Salvato):
@@ -458,14 +456,15 @@ def InserisciNome(eventi, schermo, font, nomeGiocatore, nomeInserito, Salvato):
     return nomeGiocatore.strip(), nomeInserito, Salvato
 
 
-def CreaMappa():
-    f = open("", "r", encoding="utf-8")
+def CreaMappa(path):
+    f = open(path, "r", encoding="utf-8")
     mappa = []
     for riga in f:
         riga = riga.strip()
         mappa.append(riga)
     return mappa
-    
+
+
 mappaTile = {
     "A" : pygame.image.load("tile/prato.png"),
     "B" : pygame.image.load("tile/fiume.png"),
@@ -568,7 +567,7 @@ def OrdinaClassifica(crescente=False):
  tempoUltimaOndata, durataOndata, ListaZombie,
  sangueMostrato, tempoSangue, ListaSangue,
  cuori, contatoreDanno, tempoUltimoDanno,
- gioco, font,nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe) = StatoIniziale()
+ gioco, font,nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile) = StatoIniziale()
 
 clock = pygame.time.Clock()
 gameOver = False
@@ -596,7 +595,7 @@ while not gameOver:
                 tempoUltimaOndata, durataOndata, ListaZombie,
                 sangueMostrato, tempoSangue, ListaSangue,
                 cuori, contatoreDanno, tempoUltimoDanno,
-                gioco, font,nomeGiocatore, inserendoNome, nomeInserito,Salvato, MieMappe) = StatoIniziale()
+                gioco, font,nomeGiocatore, inserendoNome, nomeInserito,Salvato, MieMappe, MioFile) = StatoIniziale()
 
             
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -618,6 +617,7 @@ while not gameOver:
         if not spazioPremuto:
             schermo.blit(schermataTitolo, (0, 0))
         elif mappaCorrente is None and not MieMappe:
+
             schermo.blit(SfondoMappe, (0, 0))
             schermo.blit(MiniMappe[1], (30, 400))
             schermo.blit(MiniMappe[2], (400, 400))
@@ -633,21 +633,24 @@ while not gameOver:
                     
             else:
                 for event in eventi:
-                    scelta = ScegliMappa(event, gioco, MieMappe)
-                    if scelta:
+                    scelta, n = ScegliMappa(event)
+                    if n == 1 or n==2 or n == 3:
                         mappaCorrente = scelta
                         gioco = True
-                        
-                
-                
-            if MieMappe == True:
-                schermo.blit(SfondoMappe, (0,0))
-                
+                    elif n == 4: 
+                        mappaCorrente = scelta
+                        gioco = True
+                        MioFile = True
+                         
     else:
         if cuori <= 0:
             schermo.blit(GameOver, (400, 10))
         else:
-            schermo.blit(mappaCorrente, (0, 0))
+            if MioFile == False:
+                schermo.blit(mappaCorrente, (0, 0))
+            else:
+                mappa = CreaMappa(mappaCorrente)
+                DisegnaMappa(mappa)
             
             tasti = pygame.key.get_pressed()
             giocatoreX, giocatoreY = GestisciMovimento(tasti, giocatoreX, giocatoreY, velocita)
