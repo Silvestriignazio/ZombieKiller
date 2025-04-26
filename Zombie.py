@@ -66,14 +66,20 @@ def RotazioneZombie(immagine, zx, zy, giocatoreX, giocatoreY):
     return immagineRuotata, rett
 
 
-def ScegliMappa(event):
+def ScegliMappa(event, gioco, MieMappe):
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_1:
-            return DizionarioMappe[1]
+            gioco = True 
+            return DizionarioMappe[1], gioco
         elif event.key == pygame.K_2:
-            return DizionarioMappe[2]
+            gioco = True 
+            return DizionarioMappe[2], gioco
         elif event.key == pygame.K_3:
-            return DizionarioMappe[3]
+            gioco = True 
+            return DizionarioMappe[3], gioco
+        elif event.key == pygame.K_4:
+            MieMappe = True 
+            return SfondoMappe, MieMappe
     return None
 
 def GestisciSpazio(event, SpazioPremuto):
@@ -383,6 +389,8 @@ def StatoIniziale():
     ricarica = False
     IntervalloSparo = 0.5
 
+    MieMappe = False
+
     ZombieUccisi = 0
     velocitaZombie = 2
     frequenzaSpawn = 2000
@@ -419,7 +427,7 @@ def StatoIniziale():
             tempoUltimaOndata, durataOndata, ListaZombie,
             sangueMostrato, tempoSangue, ListaSangue,
             cuori, contatoreDanno, tempoUltimoDanno,
-            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato)
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe)
 
 
 def InserisciNome(eventi, schermo, font, nomeGiocatore, nomeInserito, Salvato):
@@ -451,7 +459,7 @@ def InserisciNome(eventi, schermo, font, nomeGiocatore, nomeInserito, Salvato):
 
 
 def CreaMappa():
-    f = open("mappe\mappa4.txt", "r", encoding="utf-8")
+    f = open("", "r", encoding="utf-8")
     mappa = []
     for riga in f:
         riga = riga.strip()
@@ -560,7 +568,7 @@ def OrdinaClassifica(crescente=False):
  tempoUltimaOndata, durataOndata, ListaZombie,
  sangueMostrato, tempoSangue, ListaSangue,
  cuori, contatoreDanno, tempoUltimoDanno,
- gioco, font,nomeGiocatore, inserendoNome, nomeInserito, Salvato) = StatoIniziale()
+ gioco, font,nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe) = StatoIniziale()
 
 clock = pygame.time.Clock()
 gameOver = False
@@ -588,7 +596,7 @@ while not gameOver:
                 tempoUltimaOndata, durataOndata, ListaZombie,
                 sangueMostrato, tempoSangue, ListaSangue,
                 cuori, contatoreDanno, tempoUltimoDanno,
-                gioco, font,nomeGiocatore, inserendoNome, nomeInserito,Salvato) = StatoIniziale()
+                gioco, font,nomeGiocatore, inserendoNome, nomeInserito,Salvato, MieMappe) = StatoIniziale()
 
             
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -609,7 +617,7 @@ while not gameOver:
     if not gioco:
         if not spazioPremuto:
             schermo.blit(schermataTitolo, (0, 0))
-        elif mappaCorrente is None:
+        elif mappaCorrente is None and not MieMappe:
             schermo.blit(SfondoMappe, (0, 0))
             schermo.blit(MiniMappe[1], (30, 400))
             schermo.blit(MiniMappe[2], (400, 400))
@@ -625,10 +633,16 @@ while not gameOver:
                     
             else:
                 for event in eventi:
-                    scelta = ScegliMappa(event)
+                    scelta = ScegliMappa(event, gioco, MieMappe)
                     if scelta:
                         mappaCorrente = scelta
                         gioco = True
+                        
+                
+                
+            if MieMappe == True:
+                schermo.blit(SfondoMappe, (0,0))
+                
     else:
         if cuori <= 0:
             schermo.blit(GameOver, (400, 10))
