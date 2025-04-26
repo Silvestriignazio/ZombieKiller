@@ -7,8 +7,8 @@ import random
 os.system("cls")
 pygame.init()
 
-MINIMAPPA_LARGHEZZA = 300
-MINIMAPPA_ALTEZZA = 250
+MINIMAPPA_LARGHEZZA = 272
+MINIMAPPA_ALTEZZA = 240
 LARGHEZZASCHERMO = 1440
 ALTEZZASCHERMO = 796
 pygame.display.set_caption('ZOMBI KILLER')
@@ -18,12 +18,14 @@ schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO))
 DizionarioMappe = {
     1: pygame.image.load("mappe/mappa1.png"),
     2: pygame.image.load("mappe/mappa2.png"),
-    3: pygame.image.load("mappe/mappa3.png")
+    3: pygame.image.load("mappe/mappa3.png"),
+    4: pygame.image.load("mappe/aggiuntaMappa.png")
 }
 MiniMappe = {
     1: pygame.transform.scale(DizionarioMappe[1], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
     2: pygame.transform.scale(DizionarioMappe[2], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
-    3: pygame.transform.scale(DizionarioMappe[3], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA))
+    3: pygame.transform.scale(DizionarioMappe[3], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
+    4: pygame.transform.scale(DizionarioMappe[4], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA))
 }
 
 def CaricaImmagini():
@@ -412,7 +414,27 @@ def InserisciNome():
 
 
 def CreaMappa():
-    pass
+    f = open("mappe\mappa4.txt", "r", encoding="utf-8")
+    mappa = []
+    for riga in f:
+        riga = riga.strip()
+        mappa.append(riga)
+    return mappa
+    
+mappaTile = {
+    "A" : pygame.image.load("immagini/prato.png"),
+    "B" : pygame.image.load("immagini/fiume.png"),
+    "C" : pygame.image.load("immagini/sentiero.png"),
+    "D" : pygame.image.load("immagini/strada.png"),
+    "E" : pygame.image.load("immagini/muro.png")
+    }
+
+def DisegnaMappa(mappa):
+    for y, riga in enumerate(mappa):
+        for x, tile in enumerate(riga):
+            if tile in mappaTile:
+                # Disegna il tile corrispondente alla lettera
+                schermo.blit(mappaTile[tile], (x * 32, y * 32))  # Ad esempio, tile di 32x32px
 
 
 
@@ -488,9 +510,10 @@ while not gameOver:
             schermo.blit(schermataTitolo, (0, 0))
         elif mappaCorrente is None:
             schermo.blit(SfondoMappe, (0, 0))
-            schermo.blit(MiniMappe[1], (100, 400))
-            schermo.blit(MiniMappe[2], (580, 400))
-            schermo.blit(MiniMappe[3], (1100, 400))
+            schermo.blit(MiniMappe[1], (50, 400))
+            schermo.blit(MiniMappe[2], (420, 400))
+            schermo.blit(MiniMappe[3], (780, 400))
+            schermo.blit(MiniMappe[4], (1150, 400))
     else:
         if cuori <= 0:
             schermo.blit(GameOver, (400, 10))
