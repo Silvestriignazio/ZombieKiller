@@ -7,8 +7,8 @@ import random
 os.system("cls")
 pygame.init()
 
-MINIMAPPA_LARGHEZZA = 272
-MINIMAPPA_ALTEZZA = 240
+MINIMAPPA_LARGHEZZA = 300
+MINIMAPPA_ALTEZZA = 250
 LARGHEZZASCHERMO = 1440
 ALTEZZASCHERMO = 796
 pygame.display.set_caption('ZOMBI KILLER')
@@ -18,14 +18,12 @@ schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO))
 DizionarioMappe = {
     1: pygame.image.load("mappe/mappa1.png"),
     2: pygame.image.load("mappe/mappa2.png"),
-    3: pygame.image.load("mappe/mappa3.png"),
-    4: pygame.image.load("mappe/aggiuntaMappa.png")
+    3: pygame.image.load("mappe/mappa3.png")
 }
 MiniMappe = {
     1: pygame.transform.scale(DizionarioMappe[1], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
     2: pygame.transform.scale(DizionarioMappe[2], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
-    3: pygame.transform.scale(DizionarioMappe[3], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA)),
-    4: pygame.transform.scale(DizionarioMappe[4], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA))
+    3: pygame.transform.scale(DizionarioMappe[3], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA))
 }
 
 def CaricaImmagini():
@@ -41,8 +39,13 @@ def CaricaImmagini():
     fulmine = pygame.transform.scale(pygame.image.load("immagini/fulmine.png"), (50, 50))
     rifornimenti = pygame.transform.scale(pygame.image.load("immagini/risorse.png"), (40, 40))
     GameOver = pygame.transform.scale(pygame.image.load("immagini/GAMEOVER.png"), (700, 700))
+    uno = pygame.transform.scale(pygame.image.load("immagini/uno.png"), (50, 50))
+    due = pygame.transform.scale(pygame.image.load("immagini/due.png"), (50, 50))
+    tre = pygame.transform.scale(pygame.image.load("immagini/tre.png"), (50, 50))
+    quattro = pygame.transform.scale(pygame.image.load("immagini/quattro.png"), (50, 50))
 
-    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver
+
+    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
     dx = mouseX - x
@@ -105,8 +108,7 @@ def GestisciProiettili(listaProiettili, velocitaProiettile):
             restanti.append(p)
     listaProiettili[:] = restanti
 
-def GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi):
-    font = pygame.font.Font("font/ZOMBIE.TTF", 36)
+def GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi, font):
     testoColpi = font.render(F"Colpi {caricatore}", True, (255,255,255))
     schermo.blit(testoColpi, (10,10))
     if caricatore == 0:
@@ -174,7 +176,7 @@ def CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi):
     daRimuovereP = []
 
     for z in ListaZombie:
-        rectZ = pygame.Rect(z[0], z[1], 40, 43)
+        rectZ = pygame.Rect(z[0], z[1], 35, 43)
         for p in listaProiettili:
             rectP = pygame.Rect(p[0], p[1], 10, 10)
             if rectZ.colliderect(rectP):
@@ -223,12 +225,12 @@ def AumentoSpawnZombie(tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataO
 
 
 def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno):
-    rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 32, 32)
+    rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 49, 43)
     tempoAttuale = pygame.time.get_ticks()
     dannoSubito = False
 
     for z in ListaZombie:
-        rectZombie = pygame.Rect(z[0], z[1], 40, 43)
+        rectZombie = pygame.Rect(z[0], z[1], 35, 43)
         if rectGiocatore.colliderect(rectZombie):
             dannoSubito = True
 
@@ -264,7 +266,7 @@ def CuoriCasuali(tempoUltimoCuore, CuorePos, CuoreVisibile, giocatoreX, giocator
             tempoUltimoCuore = pygame.time.get_ticks()
 
     if CuoreVisibile:
-        rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 64, 64)
+        rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 49, 43)
         rectCuore = pygame.Rect(CuorePos[0], CuorePos[1], 50, 50)
         if rectGiocatore.colliderect(rectCuore):
             if cuori < maxCuori:
@@ -290,7 +292,7 @@ def FulminiCasuali(tempoUltimoFulmine, FulminePos, FulmineVisibile, giocatoreX, 
 
     
     if FulmineVisibile:
-        rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 64, 64)
+        rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 49, 43)
         rectFulmine = pygame.Rect(FulminePos[0], FulminePos[1], 70, 70)
 
         if rectGiocatore.colliderect(rectFulmine):
@@ -329,7 +331,7 @@ def ColpiCasuali(ColpiVisibili, tempoUltimoRifornimento, RifPos, giocatoreX, gio
             tempoUltimoRifornimento = tempoAttuale
 
     if ColpiVisibili:
-        rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 64, 64)
+        rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 49, 43)
         rectRifornimento = pygame.Rect(RifPos[0], RifPos[1], 70, 70)
 
         if rectGiocatore.colliderect(rectRifornimento):
@@ -397,6 +399,8 @@ def StatoIniziale():
 
     gioco = False
 
+    font = pygame.font.Font("font/ZOMBIE.TTF", 36)
+
     return (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
             tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
             tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
@@ -407,10 +411,10 @@ def StatoIniziale():
             tempoUltimaOndata, durataOndata, ListaZombie,
             sangueMostrato, tempoSangue, ListaSangue,
             cuori, contatoreDanno, tempoUltimoDanno,
-            gioco)
+            gioco, font)
 
-def InserisciNome():
-    pass
+
+
 
 
 def CreaMappa():
@@ -448,18 +452,24 @@ def DisegnaMappa(mappa):
  tempoUltimaOndata, durataOndata, ListaZombie,
  sangueMostrato, tempoSangue, ListaSangue,
  cuori, contatoreDanno, tempoUltimoDanno,
- gioco) = StatoIniziale()
+ gioco, font) = StatoIniziale()
 
 clock = pygame.time.Clock()
 gameOver = False
 
-# Carica tutte le immagini
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver = CaricaImmagini()
+
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver,uno,due,tre,quattro = CaricaImmagini()
+
+nome_giocatore = ""
+inserendo_nome = True
+eventi = pygame.event.get()
 
 while not gameOver:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameOver = True
+
+        
         
         
         if gioco:
@@ -475,7 +485,7 @@ while not gameOver:
                 tempoUltimaOndata, durataOndata, ListaZombie,
                 sangueMostrato, tempoSangue, ListaSangue,
                 cuori, contatoreDanno, tempoUltimoDanno,
-                gioco) = StatoIniziale()
+                gioco, font) = StatoIniziale()
 
                 
                 spazioPremuto = False
@@ -510,10 +520,10 @@ while not gameOver:
             schermo.blit(schermataTitolo, (0, 0))
         elif mappaCorrente is None:
             schermo.blit(SfondoMappe, (0, 0))
-            schermo.blit(MiniMappe[1], (50, 400))
-            schermo.blit(MiniMappe[2], (420, 400))
-            schermo.blit(MiniMappe[3], (780, 400))
-            schermo.blit(MiniMappe[4], (1150, 400))
+            schermo.blit(MiniMappe[1], (100, 400))
+            schermo.blit(MiniMappe[2], (580, 400))
+            schermo.blit(MiniMappe[3], (1100, 400))
+            schermo.blit(uno, (150, 500))
     else:
         if cuori <= 0:
             schermo.blit(GameOver, (400, 10))
@@ -571,7 +581,7 @@ while not gameOver:
                 ricarica = False
             
             
-            GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi)
+            GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi, font)
 
     pygame.display.update()
     clock.tick(120)
