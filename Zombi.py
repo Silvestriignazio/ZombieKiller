@@ -407,6 +407,14 @@ def StatoIniziale():
             cuori, contatoreDanno, tempoUltimoDanno,
             gioco)
 
+def InserisciNome():
+    pass
+
+
+def CreaMappa():
+    pass
+
+
 
 (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
  tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
