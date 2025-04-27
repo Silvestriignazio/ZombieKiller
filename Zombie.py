@@ -671,9 +671,6 @@ while not gameOver:
         
         if gioco:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and cuori == 0:
-                if Salvato == False:
-                    AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
-                    Salvato = True
             
                 (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
                 tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
@@ -735,9 +732,8 @@ while not gameOver:
     else:
         if cuori <= 0:
             schermo.blit(GameOver, (400, 10))
-            if Salvato == False:
-                AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
-                Salvato = True
+            AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
+
         else:
             if MioFile == False:
                 schermo.blit(mappaCorrente, (0, 0))
@@ -807,6 +803,10 @@ while not gameOver:
 
     pygame.display.update()
     clock.tick(120)
+
+
+AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
+
 
 
 pygame.quit()
