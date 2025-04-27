@@ -423,6 +423,10 @@ def StatoIniziale():
     vitaBoss = 10
     velocitaBoss = 3
 
+    nuovoPercorso = ""
+    messaggioMappaNonCorretta = False
+    tempoMessaggioErrore = 0
+
     return (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
             tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
             tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
@@ -433,7 +437,8 @@ def StatoIniziale():
             tempoUltimaOndata, durataOndata, ListaZombie,
             sangueMostrato, tempoSangue, ListaSangue,
             cuori, contatoreDanno, tempoUltimoDanno,
-            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss)
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss, 
+            nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore)
 
 
 def InserisciNome(eventi, schermo, font, nomeGiocatore, nomeInserito, Salvato):
@@ -679,11 +684,7 @@ gameOver = False
             tempoUltimaOndata, durataOndata, ListaZombie,
             sangueMostrato, tempoSangue, ListaSangue,
             cuori, contatoreDanno, tempoUltimoDanno,
-            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss) = StatoIniziale()
-
-
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss,mirino, SfondoMieMappe = CaricaImmagini()
-
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore) = StatoIniziale()
 
 def MostraSceltaMappaPersonale(schermo, font):
     cartella = "MieMappe"
@@ -739,9 +740,24 @@ def MostraSceltaMappaPersonale(schermo, font):
                 if event.key == pygame.K_ESCAPE:
                     return None
 
-nuovoPercorso = ""
-messaggioMappaNonCorretta = False
-tempoMessaggioErrore = 0
+clock = pygame.time.Clock()
+gameOver = False
+
+
+(mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
+            tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
+            tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
+            tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
+            listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
+            ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
+            ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
+            tempoUltimaOndata, durataOndata, ListaZombie,
+            sangueMostrato, tempoSangue, ListaSangue,
+            cuori, contatoreDanno, tempoUltimoDanno,
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore) = StatoIniziale()
+
+
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss,mirino, SfondoMieMappe = CaricaImmagini()
 
 while not gameOver:
     eventi = pygame.event.get()
@@ -763,7 +779,8 @@ while not gameOver:
                 tempoUltimaOndata, durataOndata, ListaZombie,
                 sangueMostrato, tempoSangue, ListaSangue,
                 cuori, contatoreDanno, tempoUltimoDanno,
-                gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss) = StatoIniziale()
+                gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,
+                velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore) = StatoIniziale()
 
             
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
