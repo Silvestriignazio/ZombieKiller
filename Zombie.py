@@ -472,6 +472,7 @@ def CreaMappa(path):
     return mappa
 
 
+
 mappaTile = {
     "A" : pygame.image.load("tile/prato.png"),
     "B" : pygame.image.load("tile/fiume.png"),
