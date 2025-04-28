@@ -57,7 +57,10 @@ def CaricaImmagini():
     return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss, mirino,SfondoMieMappe,bomba
 
 def CaricaSuoni(): 
-    pass 
+    Suonoarma = pygame.mixer.Sound('suoni/armaScarica.mp3')
+    suonoRicarica = pygame.mixer.Sound('suoni/ricarica.mp3')
+    Suonosangue = pygame.mixer.Sound('suoni/sangue.mp3')
+    return Suonoarma, suonoRicarica, Suonosangue
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
     dx = mouseX - x
@@ -118,7 +121,7 @@ def GestisciProiettili(listaProiettili, velocitaProiettile):
     for p in listaProiettili:
         p[0] += p[2] * velocitaProiettile
         p[1] += p[3] * velocitaProiettile
-        if 0 <= p[0] <= LARGHEZZASCHERMO and 0 <= p[1] <= ALTEZZASCHERMO:
+        if 0 <= p[0] and p[0] <= LARGHEZZASCHERMO and 0 <= p[1] and p[1] <= ALTEZZASCHERMO:
             restanti.append(p)
     listaProiettili[:] = restanti
 
@@ -128,6 +131,7 @@ def GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, Zombi
     if caricatore == 0:
         testoColpi = font.render(F"Colpi {caricatore}", True, (255,0,0))
         schermo.blit(testoColpi, (10,10))
+        Suonoarma.play()
     if ricarica:
         tempo = max(0, 2 - int(time.time() - ultimaRicarica))
         testoRicarica = font.render(F"Ricarica {tempo}s", True, (255,0,0))
@@ -195,6 +199,7 @@ def CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi):
             rectP = pygame.Rect(p[0], p[1], 10, 10)
             if rectZ.colliderect(rectP):
                 daRimuovereZ.append(z)
+                Suonosangue.play()
                 daRimuovereP.append(p)
                 ListaSangue.append([z[0], z[1], pygame.time.get_ticks()])
                 ZombieUccisi +=1
@@ -803,7 +808,7 @@ gameOver = False
 
 
 schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss,mirino, SfondoMieMappe, bomba = CaricaImmagini()
-
+Suonoarma, suonoRicarica, Suosangue = CaricaSuoni()
 
 while not gameOver:
     eventi = pygame.event.get()
@@ -829,6 +834,7 @@ while not gameOver:
                 velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore,tempoUltimaBomba,BombaVisibile,BombaPos,BombaPresa,tempoBombaRaccolta) = StatoIniziale()
 
             
+            
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouseX, mouseY = pygame.mouse.get_pos()
                 if caricatore > 0 and not ricarica and time.time() - ultimoColpo >= IntervalloSparo:
@@ -839,6 +845,7 @@ while not gameOver:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 if not ricarica and caricatore < maxCaricatore and scorte > 0:
                     ricarica = True
+                    suonoRicarica.play()
                     ultimaRicarica = time.time()
         
         else:
