@@ -32,6 +32,7 @@ MiniMappe = {
     "m": pygame.transform.scale(DizionarioMappe["m"], (MINIMAPPA_LARGHEZZA, MINIMAPPA_ALTEZZA))
 }
 def CaricaImmagini():
+
     schermataTitolo = pygame.image.load("immagini/titolo.png")
     sfondoMappe = pygame.image.load("immagini/sfondoMappe.png")
     personaggio = pygame.image.load("immagini/personaggio.png")
@@ -57,6 +58,7 @@ def CaricaImmagini():
     return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss, mirino,SfondoMieMappe,bomba
 
 def CaricaSuoni(): 
+
     Suonoarma = pygame.mixer.Sound('suoni/armaScarica.mp3')
     suonoRicarica = pygame.mixer.Sound('suoni/ricarica.mp3')
     Suonosangue = pygame.mixer.Sound('suoni/sangue.mp3')
@@ -71,6 +73,7 @@ def CaricaSuoni():
     return Suonoarma, suonoRicarica, Suonosangue, SuonoDanno, SuonoBomba,Sottofondo, canaleSottofondo
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
+
     dx = mouseX - x
     dy = mouseY - y
     angolo = -math.degrees(math.atan2(dy, dx))
@@ -79,6 +82,7 @@ def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
     return immagineRuotata, rett
 
 def RotazioneZombie(immagine, zx, zy, giocatoreX, giocatoreY):
+
     dx = giocatoreX - zx
     dy = giocatoreY - zy
     angolo = -math.degrees(math.atan2(dy, dx))
@@ -88,6 +92,7 @@ def RotazioneZombie(immagine, zx, zy, giocatoreX, giocatoreY):
 
 
 def ScegliMappa(event,nuovoPercorso):
+
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_1:
             return DizionarioMappe[1],1
@@ -105,6 +110,7 @@ def GestisciSpazio(event, SpazioPremuto):
     return SpazioPremuto
 
 def GestisciMovimento(tasti, x, y, velocita):
+
     if tasti[pygame.K_a] and x > 0:
         x -= velocita
     if tasti[pygame.K_d] and x < LARGHEZZASCHERMO - 64:
@@ -116,6 +122,7 @@ def GestisciMovimento(tasti, x, y, velocita):
     return x, y
 
 def SparaProiettile(x, y, mouseX, mouseY, listaProiettili):
+
     angoloRad = math.atan2(mouseY - (y+32), mouseX - (x+32))
     dx = math.cos(angoloRad)
     dy = math.sin(angoloRad)
@@ -125,6 +132,7 @@ def SparaProiettile(x, y, mouseX, mouseY, listaProiettili):
     listaProiettili.append([startX, startY, dx, dy, -math.degrees(angoloRad)])
 
 def GestisciProiettili(listaProiettili, velocitaProiettile):
+
     restanti = []
     for p in listaProiettili:
         p[0] += p[2] * velocitaProiettile
@@ -134,6 +142,7 @@ def GestisciProiettili(listaProiettili, velocitaProiettile):
     listaProiettili[:] = restanti
 
 def GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi, font):
+
     testoColpi = font.render(F"Colpi {caricatore}", True, (255,255,255))
     schermo.blit(testoColpi, (10,10))
     if caricatore == 0:
@@ -151,6 +160,7 @@ def GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, Zombi
     schermo.blit(TestoScorte, (10, 50))
 
 def SpawnZombie(partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, partenzaDx, fineDX):
+
     lato = random.choice(["su","giu","sinistra","destra"])
     if lato == "su":
         return [random.randint(partenzaSu, fineSu), -50]
@@ -162,6 +172,7 @@ def SpawnZombie(partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, pa
         return [LARGHEZZASCHERMO + 50, random.randint(partenzaDx, fineDX)]
 
 def GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie):
+
     centroX = giocatoreX + 32
     centroY = giocatoreY + 32
     distanzaMinima = 40
@@ -198,6 +209,7 @@ def GestisciZombie(ListaZombie, giocatoreX, giocatoreY, velocitaZombie, zombie):
 
 
 def CollisioniZombie(ListaZombie, listaProiettili, ZombieUccisi):
+
     daRimuovereZ = []
     daRimuovereP = []
 
@@ -235,7 +247,7 @@ def GestisciSangue(ListaSangue):
 
 
 def AumentoSpawnZombie(tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataOndata, partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, partenzaDx, fineDX ):
-    incremento = random.randint(3,10)
+
     incremento = random.randint(3,10)
     if pygame.time.get_ticks() - tempoUltimaOndata >= 15000:
         for _ in range(10+incremento):
@@ -252,6 +264,7 @@ def AumentoSpawnZombie(tempoUltimoSpawn, ListaZombie, tempoUltimaOndata, durataO
 
 
 def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, contatoreDanno, n):
+
     rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 49, 43)
     tempoAttuale = pygame.time.get_ticks()
     dannoSubito = False
@@ -373,6 +386,7 @@ def ColpiCasuali(ColpiVisibili, tempoUltimoRifornimento, RifPos, giocatoreX, gio
 
 
 def StatoIniziale():
+
     mappaCorrente = None
     spazioPremuto = False
 
@@ -584,7 +598,7 @@ def AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi):
     
     OrdinaClassifica()
 
-# estrae le uccisioni da qualsiasi riga
+
 def estraiUccisioni(riga):
     parti = riga.split(" - ")
     for parte in parti:
@@ -696,23 +710,9 @@ def DisegnaMirino(mirino, mouseX, mouseY):
     rett = mirino.get_rect(center=(mouseX, mouseY))
     schermo.blit(mirino, rett)
 
-clock = pygame.time.Clock()
-gameOver = False
-
-
-(mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
-            tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
-            tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
-            tempoUltimoRifornimento, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti,
-            listaProiettili, velocitaProiettile, scorte, caricatore, maxCaricatore,
-            ultimoColpo, ultimaRicarica, ricarica, IntervalloSparo,
-            ZombieUccisi, velocitaZombie, frequenzaSpawn, tempoUltimoSpawn,
-            tempoUltimaOndata, durataOndata, ListaZombie,
-            sangueMostrato, tempoSangue, ListaSangue,
-            cuori, contatoreDanno, tempoUltimoDanno,
-            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore,tempoUltimaBomba,BombaVisibile,BombaPos,BombaPresa,tempoBombaRaccolta) = StatoIniziale()
 
 def MostraSceltaMappaPersonale(font):
+
     cartella = "MieMappe"
     file = []
     listaFile = os.listdir(cartella)
@@ -798,8 +798,6 @@ def GeneraBomba(BombaVisibile, tempoUltimaBomba, BombaPos, giocatoreX, giocatore
     return tempoUltimaBomba, BombaVisibile, BombaPos,BombaPresa, tempoBombaRaccolta, ZombieUccisi
 
 
-
-
 clock = pygame.time.Clock()
 gameOver = False
 
@@ -876,6 +874,7 @@ while not gameOver:
             schermo.blit(tre, (890, 650))
             schermo.blit(quattro, (1255, 650))
             
+
             if messaggioMappaNonCorretta:
                 tempoAdesso = pygame.time.get_ticks()
                 if tempoAdesso - tempoMessaggioErrore <= 3000:  
@@ -886,7 +885,8 @@ while not gameOver:
 
             if not nomeInserito:
                 nomeGiocatore, nomeInserito, Salvato = InserisciNome(eventi, schermo, font, nomeGiocatore, nomeInserito, Salvato)
-                    
+
+
             else:
                 for event in eventi:
                     scelta, n = ScegliMappa(event,nuovoPercorso)
@@ -978,9 +978,6 @@ while not gameOver:
                 scorte, Presi, tempoColpiRaccolti)
 
             
-
-           
-            
             if ricarica and time.time() - ultimaRicarica >= 2:
                 diff = min(maxCaricatore - caricatore, scorte)
                 scorte -= diff
@@ -997,9 +994,7 @@ while not gameOver:
     pygame.display.update()
     clock.tick(30)
 
-
 AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
-
 
 
 pygame.quit()
