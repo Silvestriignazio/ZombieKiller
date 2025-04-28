@@ -9,7 +9,6 @@ os.system("cls")
 pygame.init()
 pygame.mixer.init()
 
-schizzi = pygame.transform.scale(pygame.image.load("immagini/schizzi.png"), (50, 50))
 
 MINIMAPPA_LARGHEZZA = 300
 MINIMAPPA_ALTEZZA = 250
@@ -257,8 +256,6 @@ def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, c
                 contatoreDanno = 0
 
         tempoUltimoDanno = tempoAttuale
-    
-        schermo.blit(sangue, (0,0))
 
    
     for _ in range(3):
