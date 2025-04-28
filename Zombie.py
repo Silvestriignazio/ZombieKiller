@@ -148,7 +148,6 @@ def GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, Zombi
     if caricatore == 0:
         testoColpi = font.render(F"Colpi {caricatore}", True, (255,0,0))
         schermo.blit(testoColpi, (10,10))
-        Suonoarma.play()
     if ricarica:
         tempo = max(0, 2 - int(time.time() - ultimaRicarica))
         testoRicarica = font.render(F"Ricarica {tempo}s", True, (255,0,0))
@@ -772,7 +771,7 @@ def GeneraBomba(BombaVisibile, tempoUltimaBomba, BombaPos, giocatoreX, giocatore
     n = len(ListaZombie)
     tempoAttuale = pygame.time.get_ticks()
 
-    if not BombaVisibile and tempoAttuale - tempoUltimaBomba >= 60000:
+    if not BombaVisibile and tempoAttuale - tempoUltimaBomba >= 0.08:
         if random.random() < 0.04:
             BombaPos = (random.randint(0, LARGHEZZASCHERMO - 70), random.randint(0, ALTEZZASCHERMO - 70))
             BombaVisibile = True
@@ -851,6 +850,8 @@ while not gameOver:
                     SparaProiettile(giocatoreX, giocatoreY, mouseX, mouseY, listaProiettili)
                     caricatore -= 1
                     ultimoColpo = time.time()
+                if caricatore == 0:
+                    Suonoarma.play()
             
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 if not ricarica and caricatore < maxCaricatore and scorte > 0:
