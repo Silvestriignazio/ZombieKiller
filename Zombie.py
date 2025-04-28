@@ -698,7 +698,7 @@ gameOver = False
             cuori, contatoreDanno, tempoUltimoDanno,
             gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore,tempoUltimaBomba,BombaVisibile,BombaPos,BombaPresa,tempoBombaRaccolta) = StatoIniziale()
 
-def MostraSceltaMappaPersonale(schermo, font):
+def MostraSceltaMappaPersonale(font):
     cartella = "MieMappe"
     file = []
     listaFile = os.listdir(cartella)
