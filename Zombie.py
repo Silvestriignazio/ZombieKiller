@@ -49,8 +49,9 @@ def CaricaImmagini():
     boss = pygame.transform.scale(pygame.image.load("immagini/boss.png"), (100, 100))
     mirino = pygame.transform.scale(pygame.image.load("immagini\mirino.png"), (50, 50))
     SfondoMieMappe = pygame.image.load("immagini/sfondoMieMappe.png")
+    bomba = pygame.transform.scale(pygame.image.load("immagini/bomba.png"), (50, 50))
 
-    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss, mirino,SfondoMieMappe
+    return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss, mirino,SfondoMieMappe,bomba
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
     dx = mouseX - x
@@ -427,6 +428,12 @@ def StatoIniziale():
     messaggioMappaNonCorretta = False
     tempoMessaggioErrore = 0
 
+    tempoUltimaBomba = 0
+    BombaVisibile = False
+    BombaPos = (0, 0)
+    BombaPresa = False
+    tempoBombaRaccolta = 0
+
     return (mappaCorrente, spazioPremuto, giocatoreX, giocatoreY, velocita,
             tempoUltimoCuore, CuorePos, CuoreVisibile, maxCuori,
             tempoUltimoFulmine, FulminePos, FulmineVisibile, Fulmineattivo, raccolto,
@@ -438,7 +445,7 @@ def StatoIniziale():
             sangueMostrato, tempoSangue, ListaSangue,
             cuori, contatoreDanno, tempoUltimoDanno,
             gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss, 
-            nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore)
+            nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore, tempoUltimaBomba,BombaVisibile,BombaPos,BombaPresa,tempoBombaRaccolta )
 
 
 def InserisciNome(eventi, schermo, font, nomeGiocatore, nomeInserito, Salvato):
@@ -488,16 +495,13 @@ def CreaMappa(path):
             if len(riga) != 45:
                 print(f"Errore: nella mappa '{path}' la riga {i+1} ha {len(riga)} colonne, ma ne servono 45.")
                 return None
+            
 
         return mappa
 
     except Exception:
         print(F"Errore caricando la mappa {path}")
         return None
-
-
-
-
 
 
 mappaTile = {
@@ -509,12 +513,15 @@ mappaTile = {
     }
 
 
-def DisegnaMappa(mappa, mappaTile):
+def DisegnaMappa(mappa, mappaTile, messaggioMappaNonCorretta):
     for y, riga in enumerate(mappa):
         for x, tile in enumerate(riga):
             if tile in mappaTile:
                 # Disegna il tile corrispondente alla lettera
-                schermo.blit(mappaTile[tile], (x * 32, y * 32))   
+                schermo.blit(mappaTile[tile], (x * 32, y * 32))
+            else:  
+                messaggioMappaNonCorretta = True
+                return messaggioMappaNonCorretta
 
 def DataEOraPartita():
     data = datetime.datetime.now()
@@ -685,7 +692,7 @@ gameOver = False
             tempoUltimaOndata, durataOndata, ListaZombie,
             sangueMostrato, tempoSangue, ListaSangue,
             cuori, contatoreDanno, tempoUltimoDanno,
-            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore) = StatoIniziale()
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore,tempoUltimaBomba,BombaVisibile,BombaPos,BombaPresa,tempoBombaRaccolta) = StatoIniziale()
 
 def MostraSceltaMappaPersonale(schermo, font):
     cartella = "MieMappe"
@@ -741,6 +748,39 @@ def MostraSceltaMappaPersonale(schermo, font):
                 if event.key == pygame.K_ESCAPE:
                     return None
 
+def GeneraBomba(BombaVisibile, tempoUltimaBomba, BombaPos, giocatoreX, giocatoreY, BombaPresa, tempoBombaRaccolta, ListaZombie, ZombieUccisi):
+    n = len(ListaZombie)
+    tempoAttuale = pygame.time.get_ticks()
+
+    if not BombaVisibile and tempoAttuale - tempoUltimaBomba >= 25000:
+        if random.random() < 0.004:
+            BombaPos = (random.randint(0, LARGHEZZASCHERMO - 70), random.randint(0, ALTEZZASCHERMO - 70))
+            BombaVisibile = True
+            tempoUltimaBomba = tempoAttuale
+
+    if BombaVisibile == True:
+        rectGiocatore = pygame.Rect(giocatoreX, giocatoreY, 49, 43)
+        rectBomba = pygame.Rect(BombaPos[0], BombaPos[1], 50, 50)
+
+        if rectGiocatore.colliderect(rectBomba):
+            BombaVisibile = False
+            BombaPresa = True
+            tempoBombaRaccolta = tempoAttuale
+            for z in ListaZombie.copy():
+                ListaZombie.remove(z)
+                ListaSangue.append([z[0], z[1], pygame.time.get_ticks()])
+            ZombieUccisi +=n 
+
+    if BombaVisibile:
+        schermo.blit(bomba, (BombaPos))
+
+    GestisciSangue(ListaSangue)
+
+    return tempoUltimaBomba, BombaVisibile, BombaPos,BombaPresa, tempoBombaRaccolta, ZombieUccisi
+
+
+
+
 clock = pygame.time.Clock()
 gameOver = False
 
@@ -755,10 +795,11 @@ gameOver = False
             tempoUltimaOndata, durataOndata, ListaZombie,
             sangueMostrato, tempoSangue, ListaSangue,
             cuori, contatoreDanno, tempoUltimoDanno,
-            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore) = StatoIniziale()
+            gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore,tempoUltimaBomba,BombaVisibile,BombaPos,BombaPresa,tempoBombaRaccolta) = StatoIniziale()
 
 
-schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss,mirino, SfondoMieMappe = CaricaImmagini()
+schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss,mirino, SfondoMieMappe, bomba = CaricaImmagini()
+
 
 while not gameOver:
     eventi = pygame.event.get()
@@ -781,7 +822,7 @@ while not gameOver:
                 sangueMostrato, tempoSangue, ListaSangue,
                 cuori, contatoreDanno, tempoUltimoDanno,
                 gioco, font, nomeGiocatore, inserendoNome, nomeInserito, Salvato, MieMappe, MioFile, tempoUltimoBoss,ListaBoss,vitaBoss,
-                velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore) = StatoIniziale()
+                velocitaBoss,nuovoPercorso, messaggioMappaNonCorretta, tempoMessaggioErrore,tempoUltimaBomba,BombaVisibile,BombaPos,BombaPresa,tempoBombaRaccolta) = StatoIniziale()
 
             
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -859,7 +900,13 @@ while not gameOver:
             else:
                 mappa = CreaMappa(mappaCorrente)
                 if mappa:  # CONTROLLA che la mappa esista
-                    DisegnaMappa(mappa, mappaTile)
+                    messaggioMappaNonCorretta = DisegnaMappa(mappa, mappaTile, messaggioMappaNonCorretta)
+                    if messaggioMappaNonCorretta == True:
+                        tempoAdesso = pygame.time.get_ticks()
+                        if tempoAdesso - tempoMessaggioErrore <= 3000:  
+                            testoErrore = font.render("LA MAPPA NON È CORRETTA", True, (255, 0, 0))
+                            schermo.blit(testoErrore, (400, 100))
+
                     
             
             tasti = pygame.key.get_pressed()
@@ -873,6 +920,7 @@ while not gameOver:
                 rect = img.get_rect(center=(p[0], p[1]))
                 schermo.blit(img, rect.topleft)
             
+            tempoUltimaBomba, BombaVisibile, BombaPos,BombaPresa, tempoBombaRaccolta,ZombieUccisi = GeneraBomba(BombaVisibile, tempoUltimaBomba, BombaPos, giocatoreX, giocatoreY, BombaPresa, tempoBombaRaccolta, ListaZombie, ZombieUccisi)
             GestisciSangue(ListaSangue)
 
             schermo.blit(giocatoreRuotato, giocatoreRett.topleft)
@@ -907,6 +955,10 @@ while not gameOver:
             tempoUltimoRifornimento, scorte, ColpiVisibili, RifPos, Presi, tempoColpiRaccolti = ColpiCasuali(
                 ColpiVisibili, tempoUltimoRifornimento, RifPos, giocatoreX, giocatoreY, 
                 scorte, Presi, tempoColpiRaccolti)
+
+            
+
+           
             
             if ricarica and time.time() - ultimaRicarica >= 2:
                 diff = min(maxCaricatore - caricatore, scorte)
@@ -922,7 +974,7 @@ while not gameOver:
 
 
     pygame.display.update()
-    clock.tick(100)
+    clock.tick(30)
 
 
 AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
