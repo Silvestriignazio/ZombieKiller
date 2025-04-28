@@ -554,6 +554,8 @@ def DisegnaMappa(mappa, mappaTile, messaggioMappaNonCorretta):
             else:  
                 messaggioMappaNonCorretta = True
                 return messaggioMappaNonCorretta
+    
+    return messaggioMappaNonCorretta
 
 def DataEOraPartita():
     data = datetime.datetime.now()
@@ -770,7 +772,7 @@ def GeneraBomba(BombaVisibile, tempoUltimaBomba, BombaPos, giocatoreX, giocatore
     n = len(ListaZombie)
     tempoAttuale = pygame.time.get_ticks()
 
-    if not BombaVisibile and tempoAttuale - tempoUltimaBomba >= 25000:
+    if not BombaVisibile and tempoAttuale - tempoUltimaBomba >= 60000:
         if random.random() < 0.04:
             BombaPos = (random.randint(0, LARGHEZZASCHERMO - 70), random.randint(0, ALTEZZASCHERMO - 70))
             BombaVisibile = True
@@ -894,7 +896,7 @@ while not gameOver:
                         mappaCorrente = scelta
                         gioco = True
                     elif n == 4:
-                        nuovoPercorso = MostraSceltaMappaPersonale(schermo, font)
+                        nuovoPercorso = MostraSceltaMappaPersonale(font)
                         if nuovoPercorso == "chiudi":
                             gameOver = True 
                         elif nuovoPercorso:
@@ -920,13 +922,22 @@ while not gameOver:
                 tempoDiGioco = pygame.time.get_ticks()
             else:
                 mappa = CreaMappa(mappaCorrente)
-                if mappa:  # CONTROLLA che la mappa esista
+                if mappa:
                     messaggioMappaNonCorretta = DisegnaMappa(mappa, mappaTile, messaggioMappaNonCorretta)
-                    if messaggioMappaNonCorretta == True:
-                        tempoAdesso = pygame.time.get_ticks()
-                        if tempoAdesso - tempoMessaggioErrore <= 3000:  
-                            testoErrore = font.render("LA MAPPA NON È CORRETTA", True, (255, 0, 0))
-                            schermo.blit(testoErrore, (400, 100))
+
+                    if messaggioMappaNonCorretta:
+                        # il gioco viene riportato alla parte delle mappe
+                        gioco = False
+                        MieMappe = False
+                        mappaCorrente = None
+                        tempoMessaggioErrore = pygame.time.get_ticks()
+                else:
+                    gioco = False
+                    MieMappe = False
+                    mappaCorrente = None
+                    messaggioMappaNonCorretta = True
+                    tempoMessaggioErrore = pygame.time.get_ticks()
+
 
                     
             
