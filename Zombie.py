@@ -60,7 +60,15 @@ def CaricaSuoni():
     Suonoarma = pygame.mixer.Sound('suoni/armaScarica.mp3')
     suonoRicarica = pygame.mixer.Sound('suoni/ricarica.mp3')
     Suonosangue = pygame.mixer.Sound('suoni/sangue.mp3')
-    return Suonoarma, suonoRicarica, Suonosangue
+    SuonoDanno = pygame.mixer.Sound('suoni/dolore.mp3')
+    SuonoBomba = pygame.mixer.Sound('suoni/bomba.mp3')
+    Sottofondo = pygame.mixer.Sound('suoni/sottofondo.mp3')
+
+    Sottofondo.set_volume(0.09)
+    canaleSottofondo = pygame.mixer.Channel(0) 
+    canaleSottofondo.play(Sottofondo, loops=-1)
+
+    return Suonoarma, suonoRicarica, Suonosangue, SuonoDanno, SuonoBomba,Sottofondo, canaleSottofondo
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
     dx = mouseX - x
@@ -255,7 +263,8 @@ def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, c
 
     if dannoSubito and tempoAttuale - tempoUltimoDanno >= 2000:
         if cuori > 0:
-            contatoreDanno += n 
+            contatoreDanno += n
+            SuonoDanno.play()
             if contatoreDanno >= 2:
                 cuori -= 1
                 contatoreDanno = 0
@@ -762,7 +771,7 @@ def GeneraBomba(BombaVisibile, tempoUltimaBomba, BombaPos, giocatoreX, giocatore
     tempoAttuale = pygame.time.get_ticks()
 
     if not BombaVisibile and tempoAttuale - tempoUltimaBomba >= 25000:
-        if random.random() < 0.004:
+        if random.random() < 0.04:
             BombaPos = (random.randint(0, LARGHEZZASCHERMO - 70), random.randint(0, ALTEZZASCHERMO - 70))
             BombaVisibile = True
             tempoUltimaBomba = tempoAttuale
@@ -775,6 +784,7 @@ def GeneraBomba(BombaVisibile, tempoUltimaBomba, BombaPos, giocatoreX, giocatore
             BombaVisibile = False
             BombaPresa = True
             tempoBombaRaccolta = tempoAttuale
+            SuonoBomba.play()
             for z in ListaZombie.copy():
                 ListaZombie.remove(z)
                 ListaSangue.append([z[0], z[1], pygame.time.get_ticks()])
@@ -808,7 +818,7 @@ gameOver = False
 
 
 schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss,mirino, SfondoMieMappe, bomba = CaricaImmagini()
-Suonoarma, suonoRicarica, Suosangue = CaricaSuoni()
+Suonoarma, suonoRicarica, Suonosangue, SuonoDanno, SuonoBomba,suonoSottofondo, canaleSottofondo, = CaricaSuoni()
 
 while not gameOver:
     eventi = pygame.event.get()
