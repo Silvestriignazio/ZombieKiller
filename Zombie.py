@@ -7,6 +7,9 @@ import datetime
 
 os.system("cls")
 pygame.init()
+pygame.mixer.init()
+
+schizzi = pygame.transform.scale(pygame.image.load("immagini/schizzi.png"), (50, 50))
 
 MINIMAPPA_LARGHEZZA = 300
 MINIMAPPA_ALTEZZA = 250
@@ -14,6 +17,7 @@ LARGHEZZASCHERMO = 1440
 ALTEZZASCHERMO = 796
 pygame.display.set_caption('ZOMBI KILLER')
 schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO))
+
 
 
 DizionarioMappe = {
@@ -52,6 +56,9 @@ def CaricaImmagini():
     bomba = pygame.transform.scale(pygame.image.load("immagini/bomba.png"), (50, 50))
 
     return schermataTitolo, sfondoMappe, personaggio, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss, mirino,SfondoMieMappe,bomba
+
+def CaricaSuoni(): 
+    pass 
 
 def RuotaVersoMouse(immagine, x, y, mouseX, mouseY):
     dx = mouseX - x
@@ -248,18 +255,18 @@ def GestisciVita(ListaZombie, giocatoreX, giocatoreY, cuori, tempoUltimoDanno, c
             if contatoreDanno >= 2:
                 cuori -= 1
                 contatoreDanno = 0
+
         tempoUltimoDanno = tempoAttuale
+    
+        schermo.blit(sangue, (0,0))
 
    
     for _ in range(3):
         if cuori>0:
             schermo.blit(cuore, (1250, 10))
         if cuori>1:
-            schermo.blit(cuore, (1250, 10))
             schermo.blit(cuore, (1310, 10))
         if cuori>2:
-            schermo.blit(cuore, (1250, 10))
-            schermo.blit(cuore, (1310, 10))
             schermo.blit(cuore, (1370, 10))
 
 
