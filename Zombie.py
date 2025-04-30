@@ -139,7 +139,7 @@ def GestisciProiettili(listaProiettili, velocitaProiettile):
         p[1] += p[3] * velocitaProiettile
         if 0 <= p[0] and p[0] <= LARGHEZZASCHERMO and 0 <= p[1] and p[1] <= ALTEZZASCHERMO:
             restanti.append(p)
-    listaProiettili[:] = restanti
+    listaProiettili = restanti
 
 def GestisciScritte(schermo, caricatore, ricarica, ultimaRicarica, scorte, ZombieUccisi, font):
 
