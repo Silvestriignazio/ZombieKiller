@@ -771,7 +771,7 @@ def GeneraBomba(BombaVisibile, tempoUltimaBomba, BombaPos, giocatoreX, giocatore
     n = len(ListaZombie)
     tempoAttuale = pygame.time.get_ticks()
 
-    if not BombaVisibile and tempoAttuale - tempoUltimaBomba >= 0.08:
+    if not BombaVisibile and tempoAttuale - tempoUltimaBomba >= 60000:
         if random.random() < 0.04:
             BombaPos = (random.randint(0, LARGHEZZASCHERMO - 70), random.randint(0, ALTEZZASCHERMO - 70))
             BombaVisibile = True
