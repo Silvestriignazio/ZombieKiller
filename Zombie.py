@@ -5,6 +5,7 @@ import time
 import random
 import datetime
 import sys
+import json
  
 os.system("cls")
 pygame.init()
@@ -22,7 +23,8 @@ MINIMAPPA_ALTEZZA = 250
 LARGHEZZASCHERMO = 1440
 ALTEZZASCHERMO = 796
 pygame.display.set_caption('ZOMBI KILLER')
-schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO))
+schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO), pygame.RESIZABLE)
+pygame.display.set_icon(resource_path(pygame.image.load(resource_path("immagini/icon.jpeg")).convert_alpha()))
  
  
  
@@ -573,70 +575,98 @@ def DataEOraPartita():
  
 def AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi):
     data1, ora = DataEOraPartita()
- 
-    file = open(resource_path("File/Classifica.txt"), "r", encoding="utf-8")
-    contenuto = file.read()
-    file.close()
- 
-    riga = f"Nome: {nomeGiocatore} - Punteggio: {ZombieUccisi} - Data: {data1} - Ora: {ora}\n"
- 
-    if nomeGiocatore not in contenuto:
-        file = open(resource_path("File/Classifica.txt"), "a", encoding="utf-8")
-        file.write(riga)
-        file.close()
-    else:
-        file = open(resource_path("File/Classifica.txt"), "w", encoding="utf-8")
-        for linea in contenuto.splitlines():
-            if nomeGiocatore in linea:
-                # Estrae le uccisioni della partita
-                parti = linea.split(" - ")
-                uccisioniAttuali = 0
-                for parte in parti:
-                    if "Punteggio:" in parte:
-                        uccisioniAttuali = int(parte.replace("Punteggio:", "").strip()) # si estrae il valore solo per la riga che si sta controllando
- 
-                if ZombieUccisi > uccisioniAttuali:
-                    file.write(riga)
-                else:
-                    file.write(linea + "\n")  # Se non ci sono cambiamenti viene mantenuta la riga attuale
-           
-            else:
-                file.write(linea + "\n")
-       
-        file.close()
- 
-   
-    OrdinaClassifica()
- 
- 
-def estraiUccisioni(riga):
-    parti = riga.split(" - ")
-    for parte in parti:
-        if "Punteggio:" in parte:
-            return int(parte.replace("Punteggio:", "").strip())
-    return 0
+
+    path = resource_path("File/Classifica.json")
+
+    # Carica le voci esistenti (se presenti)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            entries = json.load(f)
+            if not isinstance(entries, list):
+                entries = []
+    except Exception:
+        entries = []
+
+    # Cerca voce esistente per lo stesso nome
+    updated = False
+    for entry in entries:
+        if entry.get("nome") == nomeGiocatore:
+            # Aggiorna solo se il nuovo punteggio è maggiore
+            try:
+                existing = int(entry.get("punteggio", 0))
+            except Exception:
+                existing = 0
+            if ZombieUccisi > existing:
+                entry["punteggio"] = int(ZombieUccisi)
+                entry["data"] = data1
+                entry["ora"] = ora
+            updated = True
+            break
+
+    if not updated:
+        entries.append({
+            "nome": nomeGiocatore,
+            "punteggio": int(ZombieUccisi),
+            "data": data1,
+            "ora": ora
+        })
+
+    # Ordina discendente per punteggio e salva
+    entries.sort(key=lambda e: int(e.get("punteggio", 0)), reverse=True)
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(entries, f, ensure_ascii=False, indent=2)
+    except Exception:
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(entries, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
  
  
 def OrdinaClassifica(crescente=False):
-    file = open(resource_path("File/Classifica.txt"), "r", encoding="utf-8")
-    righe = file.read().splitlines()
-    file.close()
- 
- 
-    for k in range(len(righe), 0, -1):
-        for i in range(0, k-1):
-            if crescente:
-                if estraiUccisioni(righe[i]) > estraiUccisioni(righe[i+1]):
-                    righe[i], righe[i+1] = righe[i+1], righe[i]
-            else:
-                if estraiUccisioni(righe[i]) < estraiUccisioni(righe[i+1]):
-                    righe[i], righe[i+1] = righe[i+1], righe[i]
- 
-    # vado a sovrascrivere il tutto
-    file = open(resource_path("File/Classifica.txt"), "w", encoding="utf-8")
-    for riga in righe:
-        file.write(riga + "\n")
-    file.close()
+    path = resource_path("File/Classifica.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            entries = json.load(f)
+            if not isinstance(entries, list):
+                return
+    except Exception:
+        return
+
+    entries.sort(key=lambda e: int(e.get("punteggio", 0)), reverse=not crescente)
+
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(entries, f, ensure_ascii=False, indent=2)
+    except Exception:
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(entries, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+
+def OttieniRecord(nomeGiocatore):
+    """Restituisce il punteggio migliore per il giocatore (int) o None se non presente."""
+    if not nomeGiocatore:
+        return None
+    path = resource_path("File/Classifica.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            entries = json.load(f)
+            if not isinstance(entries, list):
+                return None
+            for e in entries:
+                if e.get("nome") == nomeGiocatore:
+                    try:
+                        return int(e.get("punteggio", 0))
+                    except Exception:
+                        return 0
+    except Exception:
+        return None
  
  
 def SpawnBoss(partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, partenzaDx, fineDX, VitaBoss):
@@ -734,7 +764,10 @@ def MostraSceltaMappaPersonale(font):
     scegliendo = True
  
     while scegliendo:
-        schermo.blit(SfondoMieMappe, (0, 0))
+        try:
+            schermo.blit(SfondoMieMappe_scaled, (0, 0))
+        except Exception:
+            schermo.blit(SfondoMieMappe, (0, 0))
  
         for indice, nomefile in enumerate(file):
             testo = font.render(F"{indice+1} - {nomefile}", True, (255, 255, 255))
@@ -827,6 +860,12 @@ gameOver = False
  
 schermataTitolo, SfondoMappe, personaggioBase, proiettile, zombie, sangue, cuore, fulmine, cuoreBonus, rifornimenti, GameOver, uno,due,tre,quattro, nuovaMappa, boss,mirino, SfondoMieMappe, bomba = CaricaImmagini()
 Suonoarma, suonoRicarica, Suonosangue, SuonoDanno, SuonoBomba,suonoSottofondo, canaleSottofondo, = CaricaSuoni()
+
+# immagini scalate per adattarsi alla finestra corrente
+schermataTitolo_scaled = pygame.transform.scale(schermataTitolo, (LARGHEZZASCHERMO, ALTEZZASCHERMO))
+SfondoMappe_scaled = pygame.transform.scale(SfondoMappe, (LARGHEZZASCHERMO, ALTEZZASCHERMO))
+SfondoMieMappe_scaled = pygame.transform.scale(SfondoMieMappe, (LARGHEZZASCHERMO, ALTEZZASCHERMO))
+GameOver_scaled = pygame.transform.scale(GameOver, (min(700, LARGHEZZASCHERMO-100), min(700, ALTEZZASCHERMO-100)))
  
 while not gameOver:
     eventi = pygame.event.get()
@@ -834,6 +873,17 @@ while not gameOver:
     for event in eventi:
         if event.type == pygame.QUIT:
             gameOver = True
+        elif event.type == pygame.VIDEORESIZE:
+            # aggiorna dimensione globale e ridimensiona superfice e sfondi
+            LARGHEZZASCHERMO, ALTEZZASCHERMO = event.w, event.h
+            schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO), pygame.RESIZABLE)
+            try:
+                schermataTitolo_scaled = pygame.transform.scale(schermataTitolo, (LARGHEZZASCHERMO, ALTEZZASCHERMO))
+                SfondoMappe_scaled = pygame.transform.scale(SfondoMappe, (LARGHEZZASCHERMO, ALTEZZASCHERMO))
+                SfondoMieMappe_scaled = pygame.transform.scale(SfondoMieMappe, (LARGHEZZASCHERMO, ALTEZZASCHERMO))
+                GameOver_scaled = pygame.transform.scale(GameOver, (min(700, LARGHEZZASCHERMO-100), min(700, ALTEZZASCHERMO-100)))
+            except Exception:
+                pass
        
         if gioco:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and cuori == 0:
@@ -873,10 +923,10 @@ while not gameOver:
  
     if not gioco:
         if not spazioPremuto:
-            schermo.blit(schermataTitolo, (0, 0))
+            schermo.blit(schermataTitolo_scaled, (0, 0))
         elif mappaCorrente is None and not MieMappe:
  
-            schermo.blit(SfondoMappe, (0, 0))
+            schermo.blit(SfondoMappe_scaled, (0, 0))
             schermo.blit(MiniMappe[1], (30, 400))
             schermo.blit(MiniMappe[2], (400, 400))
             schermo.blit(MiniMappe[3], (760, 400))
@@ -885,6 +935,17 @@ while not gameOver:
             schermo.blit(due, (525, 650))
             schermo.blit(tre, (890, 650))
             schermo.blit(quattro, (1255, 650))
+            # Se il nome è già stato inserito, mostra il record personale in alto a destra
+            try:
+                if nomeInserito and nomeGiocatore.strip() != "":
+                    best = OttieniRecord(nomeGiocatore)
+                    if best is not None:
+                        testoRecord = font.render(f"PB: {best}", True, (255,255,255))
+                        rx = LARGHEZZASCHERMO - testoRecord.get_width() - 10
+                        ry = 10
+                        schermo.blit(testoRecord, (rx, ry))
+            except Exception:
+                pass
            
  
             if messaggioMappaNonCorretta:
@@ -926,18 +987,26 @@ while not gameOver:
                          
     else:
         if cuori <= 0:
-            schermo.blit(GameOver, (400, 10))
+            try:
+                gx = (LARGHEZZASCHERMO - GameOver_scaled.get_width()) // 2
+                gy = (ALTEZZASCHERMO - GameOver_scaled.get_height()) // 2
+                schermo.blit(GameOver_scaled, (gx, gy))
+            except Exception:
+                schermo.blit(GameOver, (400, 10))
             AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
- 
+
         else:
             if MioFile == False:
-                schermo.blit(mappaCorrente, (0, 0))
+                try:
+                    schermo.blit(pygame.transform.scale(mappaCorrente, (LARGHEZZASCHERMO, ALTEZZASCHERMO)), (0, 0))
+                except Exception:
+                    schermo.blit(mappaCorrente, (0, 0))
                 tempoDiGioco = pygame.time.get_ticks()
             else:
                 mappa = CreaMappa(mappaCorrente)
                 if mappa:
                     messaggioMappaNonCorretta = DisegnaMappa(mappa, mappaTile, messaggioMappaNonCorretta)
- 
+
                     if messaggioMappaNonCorretta:
                         # il gioco viene riportato alla parte delle mappe
                         gioco = False
@@ -1022,4 +1091,3 @@ AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
  
  
 pygame.quit()
- 
