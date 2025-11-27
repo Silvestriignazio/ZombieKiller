@@ -9,6 +9,8 @@ os.system("cls")
 pygame.init()
 pygame.mixer.init()
 
+#TODO ridimensionabile, 
+
 
 MINIMAPPA_LARGHEZZA = 300
 MINIMAPPA_ALTEZZA = 250
@@ -1004,7 +1006,7 @@ while not gameOver:
 
 
     pygame.display.update()
-    clock.tick(30)
+    clock.tick(60)
 
 AggiungiGiocatoreAFile(nomeGiocatore, ZombieUccisi)
 
