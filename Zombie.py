@@ -667,6 +667,26 @@ def OttieniRecord(nomeGiocatore):
                         return 0
     except Exception:
         return None
+
+
+def OttieniMigliore():
+    """Restituisce la coppia (nome, punteggio) del record migliore o (None, None)."""
+    path = resource_path("File/Classifica.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            entries = json.load(f)
+            if not isinstance(entries, list) or len(entries) == 0:
+                return None, None
+            # entries dovrebbe già essere ordinata, ma assicuriamolo
+            best = max(entries, key=lambda e: int(e.get("punteggio", 0)))
+            nome = best.get("nome")
+            try:
+                punteggio = int(best.get("punteggio", 0))
+            except Exception:
+                punteggio = 0
+            return nome, punteggio
+    except Exception:
+        return None, None
  
  
 def SpawnBoss(partenzaSu, fineSu, partenzaGiu, fineGiu, partenzaSx, fineSx, partenzaDx, fineDX, VitaBoss):
@@ -935,6 +955,14 @@ while not gameOver:
             schermo.blit(due, (525, 650))
             schermo.blit(tre, (890, 650))
             schermo.blit(quattro, (1255, 650))
+            # Mostra il record globale (nome + punteggio) in alto a sinistra
+            try:
+                top_name, top_score = OttieniMigliore()
+                if top_name is not None:
+                    testoTop = font.render(f"Top: {top_name} - {top_score}", True, (255,255,255))
+                    schermo.blit(testoTop, (10, 10))
+            except Exception:
+                pass
             # Se il nome è già stato inserito, mostra il record personale in alto a destra
             try:
                 if nomeInserito and nomeGiocatore.strip() != "":
