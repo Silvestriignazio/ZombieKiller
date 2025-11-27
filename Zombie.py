@@ -22,11 +22,9 @@ MINIMAPPA_LARGHEZZA = 300
 MINIMAPPA_ALTEZZA = 250
 LARGHEZZASCHERMO = 1440
 ALTEZZASCHERMO = 796
-pygame.display.set_caption('ZOMBI KILLER')
 schermo = pygame.display.set_mode((LARGHEZZASCHERMO, ALTEZZASCHERMO), pygame.RESIZABLE)
-pygame.display.set_icon(resource_path(pygame.image.load(resource_path("immagini/icon.jpeg")).convert_alpha()))
- 
- 
+pygame.display.set_caption('ZOMBI KILLER')
+pygame.display.set_icon(pygame.image.load(resource_path("immagini/icon.jpeg")).convert_alpha())
  
 DizionarioMappe = {
     1: pygame.image.load(resource_path("mappe/mappa1.png")),
